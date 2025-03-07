@@ -11,19 +11,21 @@
 
     <TextView
         android:id="@+id/logo"
-        android:layout_width="126dp"
-        android:layout_height="56dp"
+        android:layout_width="197dp"
+        android:layout_height="50dp"
         android:drawablePadding="10dp"
-        android:text="Sing In"
+        android:fontFamily="@font/bebas"
+        android:letterSpacing="0.1"
+        android:text="Welcome"
         android:textColor="@color/white"
-        android:textSize="36sp"
+        android:textSize="50sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintHorizontal_bias="0.149"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.237" />
+        app:layout_constraintVertical_bias="0.18" />
 
     <EditText
         android:id="@+id/inputPasswordS"
@@ -150,7 +152,21 @@
         android:paddingBottom="10dp"
         android:textColorHint="@color/white"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/logoback" />
+
+    <TextView
+        android:id="@+id/logoback"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:text="Back !!"
+        android:textColor="@color/black"
+        android:textSize="50dp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.693"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/logo" />
 
