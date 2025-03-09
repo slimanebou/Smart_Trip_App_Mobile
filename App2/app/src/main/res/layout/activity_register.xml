@@ -37,33 +37,12 @@
         app:layout_constraintVertical_bias="0.183" />
 
     <EditText
-        android:id="@+id/inputusernameR"
+        android:id="@+id/inputEmailR"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="32dp"
         android:layout_marginTop="32dp"
         android:layout_marginEnd="32dp"
-        android:background="@drawable/input_bg"
-        android:drawableLeft="@drawable/person"
-        android:drawablePadding="10dp"
-        android:ems="10"
-        android:hint="Username"
-        android:inputType="text"
-        android:paddingLeft="20dp"
-        android:paddingTop="10dp"
-        android:paddingRight="10dp"
-        android:paddingBottom="10dp"
-        android:textColorHint="@color/white"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView" />
-
-    <EditText
-        android:id="@+id/inputEmailR"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
         android:background="@drawable/input_bg"
         android:drawableLeft="@drawable/email"
         android:drawablePadding="10dp"
@@ -75,10 +54,9 @@
         android:paddingRight="10dp"
         android:paddingBottom="10dp"
         android:textColorHint="@color/white"
-        app:layout_constraintEnd_toEndOf="@+id/inputusernameR"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="@+id/inputusernameR"
-        app:layout_constraintTop_toBottomOf="@+id/inputusernameR" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView" />
 
     <EditText
         android:id="@+id/inputPasswordR"
@@ -126,11 +104,11 @@
         android:id="@+id/btnSingup"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="52dp"
+        android:layout_marginTop="76dp"
         android:drawableStart="@drawable/btn_bg"
         android:text="Sing Up"
         app:layout_constraintEnd_toEndOf="@+id/inputConfirmpasswordR"
-        app:layout_constraintHorizontal_bias="0.475"
+        app:layout_constraintHorizontal_bias="0.666"
         app:layout_constraintStart_toStartOf="@+id/inputConfirmpasswordR"
         app:layout_constraintTop_toBottomOf="@+id/inputConfirmpasswordR" />
 

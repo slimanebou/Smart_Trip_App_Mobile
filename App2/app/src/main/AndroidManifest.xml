@@ -13,10 +13,9 @@
         android:theme="@style/Theme.App"
         tools:targetApi="31">
         <activity
-            android:name=".forgotPassword"
+            android:name=".ForgotPassword"
             android:exported="true" >
         </activity>
-
         <activity
             android:name=".LoginActivity"
             android:exported="true">
@@ -29,14 +28,10 @@
         <activity
             android:name=".RegisterActivity"
             android:exported="true"
-            android:parentActivityName=".LoginActivity">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="LoginActivity" />
-        </activity>
+            android:parentActivityName=".LoginActivity"/>
         <activity
             android:name=".MainActivity"
-            android:exported="true"></activity>
+            android:exported="true"/>
     </application>
 
 </manifest>
