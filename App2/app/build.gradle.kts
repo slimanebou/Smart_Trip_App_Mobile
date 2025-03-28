@@ -51,9 +51,11 @@ dependencies {
     // Add the dependency for the Firebase Authentication library
     implementation(libs.firebase.auth)
 
-    // Import the BoM for the Firebase platform
-    //    implementation(platform("com.google.firebase:firebase-bom:33.10.0"))
-    //    implementation("com.google.firebase:firebase-auth:21.1.0")
+
+
+    //Add the dependency sign in with google
+    implementation(libs.play.services.auth)
+
 
     implementation(libs.androidx.credentials)
     implementation(libs.androidx.credentials.play.services.auth)

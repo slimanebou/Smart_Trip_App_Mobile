@@ -105,33 +105,12 @@
         android:id="@+id/google"
         android:layout_width="0dp"
         android:layout_height="35dp"
-        android:layout_marginStart="32dp"
         android:layout_marginTop="64dp"
-        android:layout_marginEnd="8dp"
         android:background="@drawable/btn_bg"
-        app:layout_constraintBottom_toBottomOf="@+id/facebook"
-        app:layout_constraintEnd_toStartOf="@+id/facebook"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/linearLayout"
+        app:layout_constraintStart_toStartOf="@+id/btnSingip"
         app:layout_constraintTop_toBottomOf="@+id/linearLayout"
-        app:layout_constraintVertical_bias="1.0"
         app:srcCompat="@drawable/google" />
-
-    <ImageButton
-        android:id="@+id/facebook"
-        android:layout_width="0dp"
-        android:layout_height="35dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="64dp"
-        android:layout_marginEnd="32dp"
-        android:background="@drawable/btn_bg"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toEndOf="@+id/google"
-        app:layout_constraintTop_toBottomOf="@+id/linearLayout"
-        app:layout_constraintVertical_bias="0.077"
-        app:srcCompat="@drawable/facebook" />
 
     <EditText
         android:id="@+id/inputEmail"

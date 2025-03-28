@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import com.example.app.databinding.ActivityRegisterBinding
 import com.google.firebase.auth.FirebaseAuth
@@ -61,8 +62,20 @@ class RegisterActivity : AppCompatActivity() {
         btn3.setOnClickListener {
             val intent = Intent(this, LoginActivity::class.java)
             startActivity(intent)
+
+            // Transition de gauche a droit (nouvelle fon overrideActiviteTrasition marche uniquement sur android 12 et plus)
+            overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
+            finish()
         }
 
+        // Handle the back button on phone with (< en bas)
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                // Handle the back button event
+                finish()
+                overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
+            }
+        })
 
     }
 }
