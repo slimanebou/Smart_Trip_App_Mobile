@@ -3,5 +3,8 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="red">#C11515</color>
-    <color name="bleu">#3262C4</color>
+    <color name="dark_blue">#32357a</color>
+    <color name="bleu">#8C94FB</color>"
+    <color name="light_bleu">#f2f1f6</color>
+
 </resources>
