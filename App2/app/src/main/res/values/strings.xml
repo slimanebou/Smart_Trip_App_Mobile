@@ -2,5 +2,7 @@
     <string name="app_name">Smart Trip</string>
     <string name="cadna">cadna</string>
     <string name="default_web_client_id">906269051389-cshn3bbpi5f6gm199sjjn6aafi0ff4hs.apps.googleusercontent.com</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 
 </resources>

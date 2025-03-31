@@ -2,14 +2,10 @@ package com.example.app
 
 import android.content.Intent
 import android.os.Bundle
-import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
-import com.example.app.databinding.ActivityLoginBinding
 import com.example.app.databinding.ActivityStartBinding
 
-class start_activity : AppCompatActivity() {
+class Start_activity : AppCompatActivity() {
 
     private lateinit var binding: ActivityStartBinding
 

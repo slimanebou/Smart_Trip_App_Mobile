@@ -48,7 +48,7 @@ class LoginActivity : AppCompatActivity() {
         //go to register activity
         val btn = findViewById<TextView>(R.id.textViewSingup)
         btn.setOnClickListener {
-            val intent = Intent(this, profile_activity::class.java)
+            val intent = Intent(this, RegisterActivity::class.java)
             startActivity(intent)
         }
 
