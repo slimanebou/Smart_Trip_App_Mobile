@@ -1,11 +1,11 @@
 package com.example.app
 
-import android.app.FragmentManager
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentTransaction
 import com.example.app.databinding.ActivityMainBinding
+import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 
 
 class MainActivity : AppCompatActivity() {
@@ -33,15 +33,40 @@ class MainActivity : AppCompatActivity() {
             }
             true
         }
+
+        val fab = findViewById<FloatingActionButton>(R.id.floatingActionButton)
+        fab.setOnClickListener {
+            val fragmentManager = supportFragmentManager
+            val currentFragment = fragmentManager.findFragmentById(R.id.frame_layout)
+
+            if (currentFragment is HomeFragment) {
+                currentFragment.prepareToStartJourney()
+            } else {
+                val homeFragment = HomeFragment()
+                val bundle = Bundle()
+                bundle.putBoolean("shouldStartJourney", true)
+                homeFragment.arguments = bundle
+
+                // Appelle ta nouvelle fonction + force sélection "Home"
+                replaceFragment(homeFragment, R.id.home)
+            }
+        }
+
     }
 
-    // function to replace fragment in navigation bar
-   private fun replaceFragment(fragment: Fragment){
-       val fragmentManager = supportFragmentManager
-       val fragmentTransaction = fragmentManager.beginTransaction()
-       fragmentTransaction.replace(R.id.frame_layout, fragment)
-       fragmentTransaction.commit()
-   }
+    private fun replaceFragment(fragment: Fragment, selectNavItemId: Int? = null) {
+        val fragmentManager = supportFragmentManager
+        val fragmentTransaction = fragmentManager.beginTransaction()
+        fragmentTransaction.replace(R.id.frame_layout, fragment)
+        fragmentTransaction.commit()
+
+        // Mettre à jour l'état du bouton de navigation si un ID est fourni
+        selectNavItemId?.let {
+            val bottomNav = findViewById<BottomNavigationView>(R.id.bottomNavigationView)
+            bottomNav.selectedItemId = it
+        }
+    }
+
 
 }
 

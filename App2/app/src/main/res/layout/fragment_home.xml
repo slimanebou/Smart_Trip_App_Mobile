@@ -8,22 +8,23 @@
 
     <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent" >
+        android:layout_height="match_parent">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
+            <!-- Partie haute inchangée -->
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
                 android:background="@color/dark_blue"
                 android:orientation="vertical">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent">
+                    android:layout_height="wrap_content">
 
                     <ImageView
                         android:id="@+id/imageView3"
@@ -76,15 +77,39 @@
                     android:padding="8dp"
                     android:textColor="@color/white"
                     android:textColorHint="@color/white" />
-
             </LinearLayout>
 
-            <ImageView
-                android:id="@+id/imageView11"
+            <!-- 🗺️ Ici on remplace l’image par la carte -->
+            <FrameLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:src="@drawable/iteniraire" />
+                android:layout_height="300dp"> <!-- hauteur à adapter -->
+
+                <org.osmdroid.views.MapView
+                    android:id="@+id/mapView"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+
+                <!-- Overlay flou -->
+                <View
+                    android:id="@+id/blurOverlay"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="#CCFFFFFF"
+                    android:visibility="gone" />
+
+                <!-- Message permission refusée -->
+                <TextView
+                    android:id="@+id/gpsDeniedMessage"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="GPS désactivé ou permission refusée"
+                    android:textColor="#000000"
+                    android:background="#AAFFFFFF"
+                    android:padding="12dp"
+                    android:layout_gravity="center"
+                    android:visibility="gone" />
+            </FrameLayout>
+
         </LinearLayout>
     </ScrollView>
-
 </FrameLayout>
