@@ -1,7 +1,9 @@
 package com.example.app
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Bundle
 import android.preference.PreferenceManager
 import android.view.LayoutInflater
@@ -19,6 +21,9 @@ import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
+import android.provider.Settings
+import com.example.app.service.GpsTrackingService
+
 
 class HomeFragment : Fragment() {
 
@@ -26,7 +31,6 @@ class HomeFragment : Fragment() {
     private lateinit var fusedLocationClient: FusedLocationProviderClient // Dernière localisation
     private lateinit var gpsDeniedMessage: TextView // Message affiché si permission refusée
     private lateinit var blurOverlay: View // Une vue flou de la map
-    private var permissionPreviouslyDenied = false
     private var shouldStartJourney = false
 
 
@@ -104,7 +108,7 @@ class HomeFragment : Fragment() {
         }
 
         fusedLocationClient.lastLocation.addOnSuccessListener { location ->
-            if (location != null) {
+            if (location != null && ::mapView.isInitialized) {
                 val point = GeoPoint(location.latitude, location.longitude)
                 mapView.controller.setZoom(15.0)
                 mapView.controller.setCenter(point)
@@ -121,6 +125,7 @@ class HomeFragment : Fragment() {
 
 
 
+
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<out String>,
@@ -128,22 +133,44 @@ class HomeFragment : Fragment() {
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
 
-        if (requestCode == 1 && grantResults.isNotEmpty()) {
-            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+        if (requestCode == 1) {
+            val permission = Manifest.permission.ACCESS_FINE_LOCATION
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // ✅ Permission accordée → on peut lancer
+                showMap()
+                getCurrentLocation()
                 if (shouldStartJourney) {
                     startJourney()
                     shouldStartJourney = false
                 }
             } else {
-                if (!permissionPreviouslyDenied) {
-                    Toast.makeText(
-                        requireContext(),
-                        "Permission refusée. Activez le GPS pour démarrer le voyage.",
-                        Toast.LENGTH_LONG
-                    ).show()
-                    blurOverlay.visibility = View.VISIBLE
-                    gpsDeniedMessage.visibility = View.VISIBLE
-                    permissionPreviouslyDenied = true
+                //  Permission refusée → faut voir si on peut redemander
+                if (shouldStartJourney) {
+                    val showRationale = ActivityCompat.shouldShowRequestPermissionRationale(
+                        requireActivity(),
+                        permission
+                    )
+
+                    if (showRationale) {
+                        // On peut redemander → afficher un petit message ou re-popup
+                        Toast.makeText(
+                            requireContext(),
+                            "La permission est nécessaire pour afficher la carte.",
+                            Toast.LENGTH_LONG
+                        ).show()
+                    } else {
+                        // L'utilisateur a coché "Ne plus demander" → on le redirige vers les paramètres
+                        Toast.makeText(
+                            requireContext(),
+                            "Autorisez la localisation dans les paramètres de l'application.",
+                            Toast.LENGTH_LONG
+                        ).show()
+
+                        val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                            data = Uri.fromParts("package", requireContext().packageName, null)
+                        }
+                        startActivity(intent)
+                    }
                 }
             }
         }
@@ -151,9 +178,11 @@ class HomeFragment : Fragment() {
 
 
 
+
     fun startJourney() {
         Toast.makeText(requireContext(), "Voyage démarré !", Toast.LENGTH_SHORT).show()
-        // Plus tard : démarrage du GPS tracking
+        val intent = Intent(requireContext(), GpsTrackingService::class.java)
+        requireContext().startService(intent)
     }
 
     fun prepareToStartJourney() {
@@ -161,8 +190,4 @@ class HomeFragment : Fragment() {
         checkLocationPermission()
     }
 
-    /*override fun onResume() {
-        super.onResume()
-        checkLocationPermission()  //  vérifie les permissions
-    }*/
 }
