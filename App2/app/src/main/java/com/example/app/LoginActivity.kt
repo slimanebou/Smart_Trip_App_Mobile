@@ -3,6 +3,7 @@ package com.example.app
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.view.MotionEvent
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -25,6 +26,8 @@ class LoginActivity : AppCompatActivity() {
     private lateinit var credentialManager: androidx.credentials.CredentialManager
     private lateinit var fireAuth: FirebaseAuth
 
+    private var isShowPassword = false
+
     companion object {
         private const val TAG = "GoogleAuth"
     }
@@ -46,8 +49,7 @@ class LoginActivity : AppCompatActivity() {
         }
 
         //go to register activity
-        val btn = findViewById<TextView>(R.id.textViewSingup)
-        btn.setOnClickListener {
+        binding.textViewSingup.setOnClickListener {
             val intent = Intent(this, RegisterActivity::class.java)
             startActivity(intent)
         }
@@ -75,12 +77,26 @@ class LoginActivity : AppCompatActivity() {
         }
 
         //go to forgot password activity
-        val btn3 = findViewById<TextView>(R.id.forgotPasswrod)
-        btn3.setOnClickListener {
+        binding.forgotPasswrod.setOnClickListener {
             val intent = Intent(this, ForgotPassword::class.java)
             startActivity(intent)
         }
 
+
+        // Détecter le clic sur l'icône drawableRight[2] [0 left, 1 top, 2 right, 3 bottom]
+        // _ = view ( (EditText) qui reçoit l'événement), event = un objet MotionEvent qui contient les informations sur l'événement (clic, déplacement, relachement, etc.)
+        binding.inputPasswordS.setOnTouchListener { _, event ->
+            // Vérifier si l'événement est un clic sur l'icône (l'utilisateur relâche son doigt après un clic.)
+            if (event.action == MotionEvent.ACTION_UP) {
+
+                // Vérifie l'endroit du click, si le clic est sur l'icône drawableRight
+                if (event.rawX >= (binding.inputPasswordS.right - binding.inputPasswordS.compoundDrawables[2].bounds.width())) {
+                    isShowPassword = !isShowPassword
+                    showPassword(isShowPassword)
+                }
+            }
+            false
+        }
     }
 
 
@@ -155,6 +171,29 @@ class LoginActivity : AppCompatActivity() {
             startActivity(intent)
             finish()
         }
+    }
+
+
+    // Fonction pour afficher ou masquer le password
+    fun showPassword(isShown: Boolean) {
+        binding.inputPasswordS.transformationMethod = if (isShown) {
+            // Afficher le texte en clair
+            android.text.method.HideReturnsTransformationMethod.getInstance()
+        } else {
+            // Masquer le texte
+            android.text.method.PasswordTransformationMethod.getInstance()
+        }
+        // Déplacer le curseur à la fin du texte
+        binding.inputPasswordS.setSelection(binding.inputPasswordS.text.length)
+
+        // Changer l'icône à droite dynamiquement
+        val drawableEnd = if (isShown) R.drawable.visibiliy else R.drawable.visibility_off
+
+        // ça adapte automatiquement la taille de l'image , Cela permet d’éviter les erreurs de mise en page
+        binding.inputPasswordS.setCompoundDrawablesWithIntrinsicBounds(
+            R.drawable.security, 0, drawableEnd, 0
+        )
+
     }
 
 }
