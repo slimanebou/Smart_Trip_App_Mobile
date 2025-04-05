@@ -2,6 +2,7 @@ package com.example.app
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.MotionEvent
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
@@ -14,6 +15,8 @@ class RegisterActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityRegisterBinding
     private lateinit var fireAuth: FirebaseAuth
+    private var isShowPassword = false
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -23,10 +26,38 @@ class RegisterActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         //return to login
-        val btn = findViewById<TextView>(R.id.alreadyHaveAccount)
-        btn.setOnClickListener {
+        binding.alreadyHaveAccount.setOnClickListener {
             val intent = Intent(this, LoginActivity::class.java)
             startActivity(intent)
+        }
+
+
+        // Détecter le clic sur l'icône drawableRight[2] [0 left, 1 top, 2 right, 3 bottom]
+        // _ = view ( (EditText) qui reçoit l'événement), event = un objet MotionEvent qui contient les informations sur l'événement (clic, déplacement, relachement, etc.)
+        binding.inputPasswordR.setOnTouchListener { _, event ->
+            // Vérifier si l'événement est un clic sur l'icône (l'utilisateur relâche son doigt après un clic.)
+            if (event.action == MotionEvent.ACTION_UP) {
+
+                // Vérifie l'endroit du click, si le clic est sur l'icône drawableRight
+                if (event.rawX >= (binding.inputPasswordR.right - binding.inputPasswordR.compoundDrawables[2].bounds.width())) {
+                    isShowPassword = !isShowPassword
+                    showPassword(isShowPassword)
+                }
+            }
+            false
+        }
+
+        binding.inputConfirmpasswordR.setOnTouchListener { _, event ->
+            // Vérifier si l'événement est un clic sur l'icône (l'utilisateur relâche son doigt après un clic.)
+            if (event.action == MotionEvent.ACTION_UP) {
+
+                // Vérifie l'endroit du click, si le clic est sur l'icône drawableRight
+                if (event.rawX >= (binding.inputConfirmpasswordR.right - binding.inputConfirmpasswordR.compoundDrawables[2].bounds.width())) {
+                    isShowPassword = !isShowPassword
+                    showPassword(isShowPassword)
+                }
+            }
+            false
         }
 
 
@@ -58,8 +89,7 @@ class RegisterActivity : AppCompatActivity() {
         }
 
         //return to login with back button
-        val btn3 = findViewById<ImageView>(R.id.back)
-        btn3.setOnClickListener {
+        binding.back.setOnClickListener {
             val intent = Intent(this, LoginActivity::class.java)
             startActivity(intent)
 
@@ -78,4 +108,41 @@ class RegisterActivity : AppCompatActivity() {
         })
 
     }
+
+    // Fonction pour afficher ou masquer le password
+    fun showPassword(isShown: Boolean) {
+        binding.inputPasswordR.transformationMethod = if (isShown) {
+            // Afficher le texte en clair
+            android.text.method.HideReturnsTransformationMethod.getInstance()
+        } else {
+            // Masquer le texte
+            android.text.method.PasswordTransformationMethod.getInstance()
+        }
+
+        binding.inputConfirmpasswordR.transformationMethod = if (isShown) {
+            // Afficher le texte en clair
+            android.text.method.HideReturnsTransformationMethod.getInstance()
+        } else {
+            // Masquer le texte
+            android.text.method.PasswordTransformationMethod.getInstance()
+        }
+
+        // Déplacer le curseur à la fin du texte
+        binding.inputPasswordR.setSelection(binding.inputPasswordR.text.length)
+        binding.inputConfirmpasswordR.setSelection(binding.inputConfirmpasswordR.text.length)
+
+
+        // Changer l'icône à droite dynamiquement
+        val drawableEnd = if (isShown) R.drawable.visibiliy else R.drawable.visibility_off
+
+        // ça adapte automatiquement la taille de l'image , Cela permet d’éviter les erreurs de mise en page
+        binding.inputPasswordR.setCompoundDrawablesWithIntrinsicBounds(
+            R.drawable.security, 0, drawableEnd, 0
+        )
+
+        binding.inputConfirmpasswordR.setCompoundDrawablesWithIntrinsicBounds(
+            R.drawable.security, 0, drawableEnd, 0
+        )
+    }
+
 }
