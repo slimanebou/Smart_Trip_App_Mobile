@@ -10,7 +10,10 @@ import android.os.Looper
 import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
+import com.example.app.HomeFragment
 import com.google.android.gms.location.*
+import com.google.android.play.integrity.internal.s
+import org.osmdroid.util.GeoPoint
 import java.util.concurrent.TimeUnit
 
 class GpsTrackingService : Service() {
@@ -27,17 +30,29 @@ class GpsTrackingService : Service() {
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
         // Définition de la fréquence : toutes les 15 minutes
-        locationRequest = LocationRequest.Builder(
+        /*locationRequest = LocationRequest.Builder(
             Priority.PRIORITY_HIGH_ACCURACY,
             TimeUnit.MINUTES.toMillis(15)
-        ).build()
+        ).build()*/
+
+        locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 5000L)
+            .setMinUpdateIntervalMillis(5000L)
+            .build()
+
 
         // Callback de localisation
         locationCallback = object : LocationCallback() {
             override fun onLocationResult(locationResult: LocationResult) {
+                super.onLocationResult(locationResult)
+
                 for (location in locationResult.locations) {
                     Log.d("SERVICE", "Coordonnées GPS : ${location.latitude}, ${location.longitude}")
-                    // Ici tu peux stocker les points dans une base locale ou un fichier
+
+                    val newPoint = GeoPoint(location.latitude, location.longitude)
+
+                    //  Ajouter à l'itinéraire si il existe
+                    HomeFragment.itinerary?.it_points?.add(newPoint)
+
                 }
             }
         }
@@ -74,17 +89,33 @@ class GpsTrackingService : Service() {
 
         // Créer le channel (obligatoire depuis Android 8)
         val manager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
-        val channel = NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_LOW)
+        val channel =
+            NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_LOW)
         manager.createNotificationChannel(channel)
 
         return NotificationCompat.Builder(this, channelId)
             .setContentTitle("Suivi en cours")
             .setContentText("L'application suit votre trajet")
             .setSmallIcon(R.drawable.ic_location) // mets une icône qui existe dans ton projet
+            .setOngoing(true)
             .build()
     }
 
     companion object {
         const val NOTIFICATION_ID = 1001
+        const val CHANNEL_ID = "gps_channel"
+        const val CHANNEL_NAME = "Suivi GPS"
     }
+
+    fun stopTracking() {
+        if (::fusedLocationClient.isInitialized) {
+            fusedLocationClient.removeLocationUpdates(locationCallback)
+        }
+        stopForeground(STOP_FOREGROUND_REMOVE)
+        stopSelf()
+    }
+
+
+
 }
+

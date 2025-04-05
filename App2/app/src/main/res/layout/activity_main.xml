@@ -44,11 +44,12 @@
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/floatingActionButton"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="53dp"
         android:backgroundTint="@color/white"
         android:src="@drawable/add"
         android:tint="@color/dark_blue"
         app:layout_anchor="@+id/bottomAppBar"
+        app:layout_anchorGravity="center"
         app:maxImageSize="40dp">
 
     </com.google.android.material.floatingactionbutton.FloatingActionButton>

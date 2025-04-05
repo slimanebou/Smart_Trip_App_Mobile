@@ -89,6 +89,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent" />
 
+
                 <!-- Overlay flou -->
                 <View
                     android:id="@+id/blurOverlay"
@@ -108,8 +109,11 @@
                     android:padding="12dp"
                     android:layout_gravity="center"
                     android:visibility="gone" />
+
             </FrameLayout>
 
         </LinearLayout>
     </ScrollView>
+
+
 </FrameLayout>
