@@ -16,7 +16,7 @@ import java.util.logging.Logger.global
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
-    private var recording = false
+    var recording = false
     private lateinit var fab : FloatingActionButton
 
 
@@ -28,7 +28,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         // set home fragment as default fragment (start)
-        replaceFragment(HomeFragment())
+        replaceFragment(HomeFragment(), R.id.home)
 
         // transition between fragments in navigation bar
         binding.bottomNavigationView.setOnItemSelectedListener {
@@ -109,7 +109,7 @@ class MainActivity : AppCompatActivity() {
             val homeFragment = HomeFragment().apply {
                 arguments = bundle
             }
-            replaceFragment(homeFragment)
+            replaceFragment(homeFragment, R.id.home)
         }
     }
 

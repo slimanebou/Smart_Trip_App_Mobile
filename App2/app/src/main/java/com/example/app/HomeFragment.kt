@@ -39,6 +39,9 @@ class HomeFragment : Fragment() {
     private lateinit var gpsDeniedMessage: TextView // Message affiché si permission refusée
     private lateinit var blurOverlay: View // Une vue flou de la map
     private var shouldStartJourney = false
+    private lateinit var pauseButton: Button
+    private lateinit var resumeButton: Button
+
 
     companion object {
         var itinerary: itinerary? = null
@@ -65,6 +68,9 @@ class HomeFragment : Fragment() {
         gpsDeniedMessage = view.findViewById(R.id.gpsDeniedMessage)
         blurOverlay = view.findViewById(R.id.blurOverlay)
 
+        pauseButton = view.findViewById(R.id.pauseButton)
+        resumeButton = view.findViewById(R.id.resumeButton)
+
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireContext())
 
 
@@ -72,11 +78,35 @@ class HomeFragment : Fragment() {
         MapConfigurator.configureMap(mapView)
 
         //  Correction : attendre que la vue soit affichée
-            shouldStartJourney = arguments?.getBoolean("shouldStartJourney", false) == true
-            val ville = arguments?.getString("villeDepart")
-            val nomTrajet = arguments?.getString("nomTrajet")
+        shouldStartJourney = arguments?.getBoolean("shouldStartJourney", false) == true
+        val ville = arguments?.getString("villeDepart")
+        val nomTrajet = arguments?.getString("nomTrajet")
 
-            if (checkLocationPermission()) {
+        pauseButton.setOnClickListener {
+            val isRecording = (requireActivity() as MainActivity).recording
+            if (isRecording) {
+                GpsTrackingService.paused = true
+                pauseButton.visibility = View.GONE
+                resumeButton.visibility = View.VISIBLE
+            } else {
+                Toast.makeText(requireContext(), "Aucun voyage en cours.", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+
+        resumeButton.setOnClickListener {
+            val isRecording = (requireActivity() as MainActivity).recording
+            if (isRecording) {
+                GpsTrackingService.paused = false
+                resumeButton.visibility = View.GONE
+                pauseButton.visibility = View.VISIBLE
+            } else {
+                Toast.makeText(requireContext(), "Aucun voyage en cours.", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+
+        if (checkLocationPermission()) {
                 showMap()
                 if (shouldStartJourney) {
                     //  Ce n'est que ICI qu'on commence tout
@@ -119,17 +149,16 @@ class HomeFragment : Fragment() {
 
 
     private fun markPosition(position:GeoPoint?, message:String) {
-                    if (position != null && ::mapView.isInitialized) {
-                        val point = GeoPoint(position.latitude, position.longitude)
-                        mapView.controller.setCenter(point)
-
-                        val marker = Marker(mapView)
-                        marker.position = point
-                        marker.title = message
-                        marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
-                        mapView.overlays.add(marker)
-                        mapView.invalidate()
-                    }
+        if (position != null && ::mapView.isInitialized) {
+            val point = GeoPoint(position.latitude, position.longitude)
+            mapView.controller.setCenter(point)
+            val marker = Marker(mapView)
+            marker.position = point
+            marker.title = message
+            marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+            mapView.overlays.add(marker)
+            mapView.invalidate()
+        }
     }
 
 

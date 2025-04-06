@@ -30,20 +30,25 @@ class GpsTrackingService : Service() {
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
         // Définition de la fréquence : toutes les 15 minutes
-        /*locationRequest = LocationRequest.Builder(
+        locationRequest = LocationRequest.Builder(
             Priority.PRIORITY_HIGH_ACCURACY,
-            TimeUnit.MINUTES.toMillis(15)
-        ).build()*/
-
+            TimeUnit.MINUTES.toMillis(10)
+        ).build()
+/*
         locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 5000L)
             .setMinUpdateIntervalMillis(5000L)
             .build()
-
+*/
 
         // Callback de localisation
         locationCallback = object : LocationCallback() {
             override fun onLocationResult(locationResult: LocationResult) {
                 super.onLocationResult(locationResult)
+
+                // ➡️ NE PAS CONTINUER SI EN PAUSE
+                if (paused) {
+                    return //  Ne rien faire si en pause
+                }
 
                 for (location in locationResult.locations) {
                     Log.d("SERVICE", "Coordonnées GPS : ${location.latitude}, ${location.longitude}")
@@ -52,10 +57,10 @@ class GpsTrackingService : Service() {
 
                     //  Ajouter à l'itinéraire si il existe
                     HomeFragment.itinerary?.it_points?.add(newPoint)
-
                 }
             }
         }
+
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
@@ -105,6 +110,7 @@ class GpsTrackingService : Service() {
         const val NOTIFICATION_ID = 1001
         const val CHANNEL_ID = "gps_channel"
         const val CHANNEL_NAME = "Suivi GPS"
+        var paused : Boolean = false
     }
 
     fun stopTracking() {
@@ -114,7 +120,6 @@ class GpsTrackingService : Service() {
         stopForeground(STOP_FOREGROUND_REMOVE)
         stopSelf()
     }
-
 
 
 }
