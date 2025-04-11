@@ -2,23 +2,24 @@ package com.example.app
 
 import android.os.Build
 import android.os.Bundle
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.MutableLiveData
 import com.example.app.databinding.ActivityMainBinding
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import java.time.LocalDate
-import java.util.logging.Logger.global
+import com.example.app.helpers.PermissionHelper
+
 
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
-    var recording = false
+    companion object{ var recording = MutableLiveData(false) }
     private lateinit var fab : FloatingActionButton
-
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -45,15 +46,27 @@ class MainActivity : AppCompatActivity() {
 
         fab = findViewById<FloatingActionButton>(R.id.floatingActionButton)
         fab.setOnClickListener {
-            if (!recording) {
-                showStartJourneyDialog()
+            if (PermissionHelper.hasLocationPermission(this)) {
+                if (!recording.value!!) {
+                    if (PermissionHelper.isGpsEnabled(this)) {
+                        showStartJourneyDialog()
+                    }
+                    else {
+                        Toast.makeText(this,"Veuillez activer votre localisation GPS.",
+                            Toast.LENGTH_SHORT).show()
+                    }
+                } else {
+                    showStopJourneyConfirmation()
+                }
             }
             else {
-                showStopJourneyConfirmation()
+                Toast.makeText(this, "Veuillez accorder les permission" +
+                        " la localisation et activer le gps.", Toast.LENGTH_SHORT).show()
+                PermissionHelper.requestLocationPermission(this)
+                }
             }
         }
 
-    }
 
     private fun replaceFragment(fragment: Fragment, selectNavItemId: Int? = null) {
         val fragmentManager = supportFragmentManager
@@ -93,24 +106,18 @@ class MainActivity : AppCompatActivity() {
 
     @RequiresApi(Build.VERSION_CODES.O)
     private fun navigateToHomeAndStartJourney(nom: String, ville: String) {
-        val fragmentManager = supportFragmentManager
-        val currentFragment = fragmentManager.findFragmentById(R.id.frame_layout)
-        recording = true
-        if (currentFragment is HomeFragment) {
-            // 🔥 Si déjà dans HomeFragment → utiliser une fonction spéciale
-            currentFragment.startJourney(ville, LocalDate.now(), nom)
-        } else {
-            //  Sinon → juste changer de fragment avec les données
-            val bundle = Bundle().apply {
-                putBoolean("shouldStartJourney", true)
-                putString("nomTrajet", nom)
-                putString("villeDepart", ville)
-            }
-            val homeFragment = HomeFragment().apply {
-                arguments = bundle
-            }
-            replaceFragment(homeFragment, R.id.home)
-        }
+        val homeFragment = HomeFragment()
+        recording.value = true
+        //  Passer les données au fragment
+        val bundle = Bundle()
+        bundle.putBoolean("startJourney", true) // Démarrer le voyage
+        bundle.putString("nom", nom)
+        bundle.putString("ville", ville)
+        homeFragment.arguments = bundle
+
+        //  Remplacer par HomeFragment avec les infos
+        replaceFragment(homeFragment, R.id.home)
+
     }
 
 
@@ -119,14 +126,22 @@ class MainActivity : AppCompatActivity() {
             .setTitle("Terminer le trajet ?")
             .setMessage("Voulez-vous vraiment terminer votre trajet ?")
             .setPositiveButton("Oui") { dialog, _ ->
-                //  🔥 Trouver le HomeFragment actuellement affiché
+                recording.value = false
                 val fragment = supportFragmentManager.findFragmentById(R.id.frame_layout)
-                if (fragment is HomeFragment) {
+                if (fragment is HomeFragment && fragment.isAdded) {
+                    //  HomeFragment est prêt → appel direct
                     fragment.stopJourney()
+                } else {
+                    //  HomeFragment pas prêt → on attend qu'il soit affiché
+                    replaceFragment(HomeFragment(), R.id.home)
+                    supportFragmentManager.executePendingTransactions() // 💡 Force le chargement immédiat
+                    val newFragment = supportFragmentManager.findFragmentById(R.id.frame_layout)
+                    if (newFragment is HomeFragment) {
+                        newFragment.stopJourney()
+                    }
                 }
 
-                recording = false
-                fab.setImageResource(R.drawable.add) //  Retourner au bouton +
+                fab.setImageResource(R.drawable.add)
                 dialog.dismiss()
             }
             .setNegativeButton("Non") { dialog, _ ->
@@ -134,6 +149,7 @@ class MainActivity : AppCompatActivity() {
             }
             .show()
     }
+
 
 
 }

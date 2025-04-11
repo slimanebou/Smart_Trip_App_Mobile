@@ -16,8 +16,5 @@ class itinerary (name : String?, date_debut:LocalDate?, date_fin : LocalDate?,
       this.it_points.add(point)
     }
 
-    fun dessiner() {
-
-    }
 
 }

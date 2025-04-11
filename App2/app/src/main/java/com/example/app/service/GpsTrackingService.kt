@@ -10,11 +10,10 @@ import android.os.Looper
 import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
-import com.example.app.HomeFragment
 import com.google.android.gms.location.*
-import com.google.android.play.integrity.internal.s
 import org.osmdroid.util.GeoPoint
 import java.util.concurrent.TimeUnit
+import com.example.app.managers.JourneyManager
 
 class GpsTrackingService : Service() {
 
@@ -45,7 +44,7 @@ class GpsTrackingService : Service() {
             override fun onLocationResult(locationResult: LocationResult) {
                 super.onLocationResult(locationResult)
 
-                // ➡️ NE PAS CONTINUER SI EN PAUSE
+                //  NE PAS CONTINUER SI EN PAUSE
                 if (paused) {
                     return //  Ne rien faire si en pause
                 }
@@ -56,7 +55,7 @@ class GpsTrackingService : Service() {
                     val newPoint = GeoPoint(location.latitude, location.longitude)
 
                     //  Ajouter à l'itinéraire si il existe
-                    HomeFragment.itinerary?.it_points?.add(newPoint)
+                    JourneyManager.currentItinerary?.it_points?.add(newPoint)
                 }
             }
         }
