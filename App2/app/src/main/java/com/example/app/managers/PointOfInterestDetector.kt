@@ -1,0 +1,53 @@
+package com.example.app.managers
+
+import com.example.app.helpers.GeoHelper
+import com.example.app.models.PointOfInterest
+import com.example.app.models.itinerary
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import org.osmdroid.util.GeoPoint
+
+class PointOfInterestDetector(
+    private val itinerary: itinerary,
+    private val detectionRadiusMeters: Double = 100.0,  // Rayon de détection
+    private val stayDurationMillis: Long = 30 * 60 * 1000  // Temps d'arrêt minimum (30 minutes par défaut)
+) {
+    private var lastLocation: GeoPoint? = null
+    private var stationaryStartTime: Long = 0L
+
+    fun processLocationUpdate(newLocation: GeoPoint) {
+        val now = System.currentTimeMillis()
+
+        if (lastLocation == null) {
+            lastLocation = newLocation
+            stationaryStartTime = now
+            return
+        }
+
+        val distance = lastLocation!!.distanceToAsDouble(newLocation)
+
+        if (distance < detectionRadiusMeters) {
+            // Si l'utilisateur reste proche du même point
+            if (now - stationaryStartTime >= stayDurationMillis) {
+                // ➔ Nouveau point d'intérêt détecté
+                detectPoiNameAndAdd(newLocation)
+                stationaryStartTime = now // Reset le temps après avoir ajouté
+            }
+        } else {
+            // Il a bougé → reset
+            lastLocation = newLocation
+            stationaryStartTime = now
+        }
+    }
+
+    private fun detectPoiNameAndAdd(location: GeoPoint) {
+        //  Lance une coroutine (tâche asynchrone)
+        CoroutineScope(Dispatchers.IO).launch {
+            val placeName = GeoHelper.getPlaceName(location.latitude, location.longitude)
+            val name = placeName ?: "Point d'intérêt inconnu"
+
+            itinerary.ajouterPointInteret(PointOfInterest(location, name))
+        }
+    }
+}

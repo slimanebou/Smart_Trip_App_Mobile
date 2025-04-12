@@ -27,16 +27,42 @@ object MapManager {
             return
         }
 
+        // 1. Dessiner la polyline
         val polyline = Polyline()
         polyline.setPoints(itinerary!!.it_points)
-
         polyline.width = 5f
         polyline.color = Color.BLUE
-
         mapView.overlays.add(polyline)
-        mapView.invalidate()
 
+        // 2. Ajouter un marker de départ
+        val startMarker = Marker(mapView)
+        startMarker.position = itinerary.it_points.first()
+        startMarker.title = "Départ"
+        startMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+        mapView.overlays.add(startMarker)
+
+        // 3. Ajouter un marker d'arrivée
+        val endMarker = Marker(mapView)
+        endMarker.position = itinerary.it_points.last()
+        endMarker.title = "Arrivée"
+        endMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+        mapView.overlays.add(endMarker)
+
+        // 4. Ajouter des markers pour les Points d'Intérêt (POIs)
+        itinerary.interst_points?.forEach { poi ->
+            val poiMarker = Marker(mapView)
+            poiMarker.position = poi.location
+            poiMarker.title = poi.name ?: "Point d'intérêt"
+            poiMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+            mapView.overlays.add(poiMarker)
+        }
+
+        // 5. Adapter la vue
         val boundingBox = BoundingBox.fromGeoPoints(itinerary.it_points)
         mapView.zoomToBoundingBox(boundingBox, true, 50)
+
+        // 6. Refresh de la map
+        mapView.invalidate()
     }
+
 }

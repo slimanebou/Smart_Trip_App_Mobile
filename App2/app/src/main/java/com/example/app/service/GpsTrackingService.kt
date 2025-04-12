@@ -14,12 +14,14 @@ import com.google.android.gms.location.*
 import org.osmdroid.util.GeoPoint
 import java.util.concurrent.TimeUnit
 import com.example.app.managers.JourneyManager
+import com.example.app.managers.PointOfInterestDetector
 
 class GpsTrackingService : Service() {
 
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var locationRequest: LocationRequest
     private lateinit var locationCallback: LocationCallback
+    private lateinit var poiDetector: PointOfInterestDetector
 
     override fun onCreate() {
         super.onCreate()
@@ -39,6 +41,9 @@ class GpsTrackingService : Service() {
             .build()
 */
 
+
+        poiDetector = PointOfInterestDetector(JourneyManager.currentItinerary!!)
+
         // Callback de localisation
         locationCallback = object : LocationCallback() {
             override fun onLocationResult(locationResult: LocationResult) {
@@ -56,6 +61,7 @@ class GpsTrackingService : Service() {
 
                     //  Ajouter à l'itinéraire si il existe
                     JourneyManager.currentItinerary?.it_points?.add(newPoint)
+                    poiDetector.processLocationUpdate(newPoint)
                 }
             }
         }
