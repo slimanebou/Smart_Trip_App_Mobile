@@ -16,7 +16,7 @@ object GeoHelper {
 
                 val connection = url.openConnection() as HttpURLConnection
                 connection.requestMethod = "GET"
-                connection.setRequestProperty("User-Agent", "YourAppName/1.0") // obligatoire pour OSM
+                connection.setRequestProperty("User-Agent", "com.example.app/1.0") // obligatoire pour OSM
                 connection.connectTimeout = 5000
                 connection.readTimeout = 5000
 

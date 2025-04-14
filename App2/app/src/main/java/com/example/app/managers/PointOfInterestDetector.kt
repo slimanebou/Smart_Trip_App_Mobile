@@ -32,19 +32,21 @@ class PointOfInterestDetector(
             if (now - stationaryStartTime >= stayDurationMillis) {
                 // ➔ Nouveau point d'intérêt détecté
                 detectPoiNameAndAdd(newLocation)
-                stationaryStartTime = now // Reset le temps après avoir ajouté
+                stationaryStartTime = now // Reset après détection
             }
         } else {
-            // Il a bougé → reset
+            // L'utilisateur a bougé
             lastLocation = newLocation
             stationaryStartTime = now
         }
     }
 
     private fun detectPoiNameAndAdd(location: GeoPoint) {
-        //  Lance une coroutine (tâche asynchrone)
+        // Lance une coroutine pour appeler l'API
         CoroutineScope(Dispatchers.IO).launch {
             val placeName = GeoHelper.getPlaceName(location.latitude, location.longitude)
+
+            // 🔥 Ici, remplace ton User-Agent manuellement :
             val name = placeName ?: "Point d'intérêt inconnu"
 
             itinerary.ajouterPointInteret(PointOfInterest(location, name))

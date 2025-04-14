@@ -5,7 +5,8 @@ import java.time.LocalDate
 
 class itinerary (name : String?, date_debut:LocalDate?, date_fin : LocalDate?,
                  ville_depart:String?, val it_points : MutableList<GeoPoint> = mutableListOf(),
-                  val interst_points : MutableList<PointOfInterest> = mutableListOf()) {
+                  val interst_points : MutableList<PointOfInterest> = mutableListOf(),
+                    val it_photos: MutableList<PhotoModel> = mutableListOf()) {
 
 
     fun ajouterPointInteret(poi: PointOfInterest) {

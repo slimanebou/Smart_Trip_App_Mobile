@@ -1,7 +1,12 @@
 package com.example.app.managers
 
-import android.graphics.Color
-import android.widget.Toast
+import android.content.Context
+import android.net.Uri
+import android.widget.ImageView
+import androidx.appcompat.app.AlertDialog
+import androidx.core.content.ContextCompat
+import com.example.app.R
+import com.example.app.models.PhotoModel
 import org.osmdroid.util.BoundingBox
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
@@ -21,41 +26,63 @@ object MapManager {
         mapView.invalidate()
     }
 
-    fun drawItinerary(mapView: MapView, itinerary: itinerary?) {
-        if (itinerary?.it_points.isNullOrEmpty()) {
-            Toast.makeText(mapView.context, "Aucun trajet à afficher", Toast.LENGTH_SHORT).show()
-            return
-        }
+    fun drawItinerary(itinerary: itinerary, mapView: MapView) {
+        if (itinerary.it_points.size < 2) return // pas assez de points pour dessiner
 
-        // 1. Dessiner la polyline
+        // 1. Trace la ligne de l'itinéraire
         val polyline = Polyline()
-        polyline.setPoints(itinerary!!.it_points)
-        polyline.width = 5f
-        polyline.color = Color.BLUE
+        polyline.setPoints(itinerary.it_points)
         mapView.overlays.add(polyline)
 
-        // 2. Ajouter un marker de départ
-        val startMarker = Marker(mapView)
-        startMarker.position = itinerary.it_points.first()
-        startMarker.title = "Départ"
-        startMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+        // 2. Marquer le départ
+        val startMarker = Marker(mapView).apply {
+            position = itinerary.it_points.first()
+            title = "Départ"
+            setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+            icon = ContextCompat.getDrawable(mapView.context, R.drawable.ic_start_marker)
+        }
         mapView.overlays.add(startMarker)
 
-        // 3. Ajouter un marker d'arrivée
-        val endMarker = Marker(mapView)
-        endMarker.position = itinerary.it_points.last()
-        endMarker.title = "Arrivée"
-        endMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+        // 3. Marquer l'arrivée
+        val endMarker = Marker(mapView).apply {
+            position = itinerary.it_points.last()
+            title = "Arrivée"
+            setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+            icon = ContextCompat.getDrawable(mapView.context, R.drawable.ic_end_marker)
+        }
         mapView.overlays.add(endMarker)
 
-        // 4. Ajouter des markers pour les Points d'Intérêt (POIs)
-        itinerary.interst_points?.forEach { poi ->
-            val poiMarker = Marker(mapView)
-            poiMarker.position = poi.location
-            poiMarker.title = poi.name ?: "Point d'intérêt"
-            poiMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+        // 4. Ajouter les POIs
+        for (poi in itinerary.interst_points) {
+            val poiMarker = Marker(mapView).apply {
+                position = poi.location
+                title = poi.name
+                setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+                icon = ContextCompat.getDrawable(mapView.context, R.drawable.ic_poi_marker)
+            }
             mapView.overlays.add(poiMarker)
         }
+
+        // 5. Ajouter les photos
+        for (photo in itinerary.it_photos) {
+            if (photo.position != null) {
+                val photoMarker = Marker(mapView).apply {
+                    position = photo.position
+                    title = "Photo"
+                    setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+                    icon = ContextCompat.getDrawable(mapView.context, R.drawable.ic_photo_marker)
+                    setOnMarkerClickListener { marker, _ ->
+                        photo.uri?.let { uri ->
+                            showPhotoDialog(mapView.context, uri)
+                        }
+                        true
+                    }
+                }
+                mapView.overlays.add(photoMarker)
+            }
+        }
+
+
 
         // 5. Adapter la vue
         val boundingBox = BoundingBox.fromGeoPoints(itinerary.it_points)
@@ -64,5 +91,21 @@ object MapManager {
         // 6. Refresh de la map
         mapView.invalidate()
     }
+
+
+    private fun showPhotoDialog(context: Context, photoUri: Uri) {
+        val imageView = ImageView(context).apply {
+            setImageURI(photoUri)
+            adjustViewBounds = true
+            scaleType = ImageView.ScaleType.FIT_CENTER
+        }
+
+        AlertDialog.Builder(context)
+            .setView(imageView)
+            .setPositiveButton("Fermer") { dialog, _ -> dialog.dismiss() }
+            .create()
+            .show()
+    }
+
 
 }
