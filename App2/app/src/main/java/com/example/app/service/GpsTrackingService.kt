@@ -31,15 +31,17 @@ class GpsTrackingService : Service() {
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
         // Définition de la fréquence : toutes les 15 minutes
-        locationRequest = LocationRequest.Builder(
+ /*       locationRequest = LocationRequest.Builder(
             Priority.PRIORITY_HIGH_ACCURACY,
             TimeUnit.MINUTES.toMillis(10)
         ).build()
-/*
+
+  */
+
         locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 5000L)
             .setMinUpdateIntervalMillis(5000L)
             .build()
-*/
+
 
 
         poiDetector = PointOfInterestDetector(JourneyManager.currentItinerary!!)

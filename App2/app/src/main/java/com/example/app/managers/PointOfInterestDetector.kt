@@ -11,7 +11,7 @@ import org.osmdroid.util.GeoPoint
 class PointOfInterestDetector(
     private val itinerary: itinerary,
     private val detectionRadiusMeters: Double = 100.0,  // Rayon de détection
-    private val stayDurationMillis: Long = 30 * 60 * 1000  // Temps d'arrêt minimum (30 minutes par défaut)
+    private val stayDurationMillis: Long = 2 * 60 * 1000  // Temps d'arrêt minimum (30 minutes par défaut)
 ) {
     private var lastLocation: GeoPoint? = null
     private var stationaryStartTime: Long = 0L

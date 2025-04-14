@@ -1,6 +1,9 @@
 package com.example.app.managers
 
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.widget.ImageView
 import androidx.appcompat.app.AlertDialog
@@ -29,6 +32,8 @@ object MapManager {
     fun drawItinerary(itinerary: itinerary, mapView: MapView) {
         if (itinerary.it_points.size < 2) return // pas assez de points pour dessiner
 
+        mapView.overlays.clear()  // Supprime tous les anciens marqueurs (y compris "Vous êtes ici")
+
         // 1. Trace la ligne de l'itinéraire
         val polyline = Polyline()
         polyline.setPoints(itinerary.it_points)
@@ -39,7 +44,8 @@ object MapManager {
             position = itinerary.it_points.first()
             title = "Départ"
             setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
-            icon = ContextCompat.getDrawable(mapView.context, R.drawable.ic_start_marker)
+            val drawable = ContextCompat.getDrawable(mapView.context, R.drawable.ic_start_marker)
+            icon = drawable?.let { resizeDrawable(it, 48, 48) }
         }
         mapView.overlays.add(startMarker)
 
@@ -48,7 +54,8 @@ object MapManager {
             position = itinerary.it_points.last()
             title = "Arrivée"
             setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
-            icon = ContextCompat.getDrawable(mapView.context, R.drawable.ic_end_marker)
+            val drawable = ContextCompat.getDrawable(mapView.context, R.drawable.ic_end_marker)
+            icon = drawable?.let { resizeDrawable(it, 48, 48) }
         }
         mapView.overlays.add(endMarker)
 
@@ -58,7 +65,8 @@ object MapManager {
                 position = poi.location
                 title = poi.name
                 setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
-                icon = ContextCompat.getDrawable(mapView.context, R.drawable.ic_poi_marker)
+                val drawable = ContextCompat.getDrawable(mapView.context, R.drawable.ic_poi_marker)
+                icon = drawable?.let { resizeDrawable(it, 48, 48) }
             }
             mapView.overlays.add(poiMarker)
         }
@@ -70,7 +78,8 @@ object MapManager {
                     position = photo.position
                     title = "Photo"
                     setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
-                    icon = ContextCompat.getDrawable(mapView.context, R.drawable.ic_photo_marker)
+                    val drawable = ContextCompat.getDrawable(mapView.context, R.drawable.ic_photo_marker)
+                    icon = drawable?.let { resizeDrawable(it, 48, 48) }
                     setOnMarkerClickListener { marker, _ ->
                         photo.uri?.let { uri ->
                             showPhotoDialog(mapView.context, uri)
@@ -106,6 +115,13 @@ object MapManager {
             .create()
             .show()
     }
+
+    private fun resizeDrawable(drawable: Drawable, width: Int, height: Int): Drawable {
+        val bitmap = (drawable as BitmapDrawable).bitmap
+        val resized = Bitmap.createScaledBitmap(bitmap, width, height, false)
+        return BitmapDrawable(resized)
+    }
+
 
 
 }
