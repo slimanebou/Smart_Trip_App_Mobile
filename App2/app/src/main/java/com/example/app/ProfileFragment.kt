@@ -7,9 +7,15 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import com.example.app.databinding.FragmentProfileBinding
 import com.google.firebase.auth.FirebaseAuth
 import com.google.android.material.snackbar.Snackbar
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 
 class ProfileFragment : Fragment() {
 
@@ -20,7 +26,13 @@ class ProfileFragment : Fragment() {
     // Déclaration une variable immutable (propriété en lecture seule) binding pour FragmentProfileBinding pour gerer les cycles de vie
     private val binding get() = _binding!!
 
+    // Initialize Firebase Auth
     private lateinit var auth: FirebaseAuth
+
+    // Initialize Firebase Realtime Database
+    private lateinit var database: FirebaseDatabase
+    private lateinit var usersRef: DatabaseReference // Référence spécifique à "users"
+
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -40,6 +52,40 @@ class ProfileFragment : Fragment() {
         binding.logoutLayout.setOnClickListener {
             showLogoutConfirmationDialog()
         }
+
+        // referece database firebase for writing or reading data
+        database = FirebaseDatabase.getInstance()
+
+        // Pointe vers users
+        usersRef = database.getReference("users")
+
+        // Récupère l'UID de l'utilisateur connecté
+        val currentUserUid = FirebaseAuth.getInstance().currentUser
+
+        // ?.let{} S'exécute SEULEMENT si currentUserUid n'est pas null
+        currentUserUid?.let { user ->
+            val uid = user.uid // Récupère l'UID
+
+            // Écoute les données de l'utilisateur spécifique
+            usersRef.child(uid).addValueEventListener(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    // Récupération directe du champ
+                    val firstName = snapshot.child("firstName").value?.toString()
+                    val lastName = snapshot.child("lastName").value?.toString()
+                    val  email= snapshot.child("email").value?.toString()
+                    binding.textView6.text = "$firstName $lastName"
+                    binding.textView7.text = email
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                    Toast.makeText(requireContext(),
+                        "Erreur de lecture: ${error.message}",
+                        Toast.LENGTH_SHORT).show()
+                }
+            })
+        }
+
+
     }
 
     // Création d'un AlertDialog avec un style
@@ -56,7 +102,7 @@ class ProfileFragment : Fragment() {
                 dialog.dismiss() // Fermer le dialogue
             }
 
-            // donner l'accessibilité à l'utilisateur pour fermer le dialogue sans cliquer sur un bouton (en cliquant a l'extérieur)
+            // donner l'accessibilité à l'utilisateur pour fermer le dialogue sans cliquer sur un bouton annuler (en cliquant a l'extérieur)
             .setCancelable(true)
             .create()
             .show()
@@ -84,6 +130,8 @@ class ProfileFragment : Fragment() {
         // as the Fragment's view hierarchy is destroyed
         _binding = null
     }
+
+
 
 
 }

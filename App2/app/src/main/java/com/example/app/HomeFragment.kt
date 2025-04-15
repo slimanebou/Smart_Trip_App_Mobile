@@ -26,16 +26,13 @@ import com.example.app.managers.MapManager
 import com.example.app.service.GpsTrackingService
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
-<<<<<<< HEAD
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
-=======
 import com.google.android.material.floatingactionbutton.FloatingActionButton
->>>>>>> refs/remotes/origin/main
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 import java.io.File
@@ -109,8 +106,6 @@ class HomeFragment : Fragment() {
     }
 
 
-
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -163,9 +158,6 @@ class HomeFragment : Fragment() {
             PermissionHelper.requestLocationPermission(this)
         }
 
-<<<<<<< HEAD
-
-
         // referece database firebase for writing or reading data
         database = FirebaseDatabase.getInstance()
 
@@ -175,8 +167,9 @@ class HomeFragment : Fragment() {
         // Récupère l'UID de l'utilisateur connecté
         val currentUserUid = FirebaseAuth.getInstance().currentUser
 
+        // ?.let{} S'exécute SEULEMENT si currentUserUid n'est pas null
         currentUserUid?.let { user ->
-            val uid = user.uid
+            val uid = user.uid // Récupère l'UID
 
             // Écoute les données de l'utilisateur spécifique
             usersRef.child(uid).addValueEventListener(object : ValueEventListener {
@@ -193,7 +186,7 @@ class HomeFragment : Fragment() {
                 }
             })
         }
-=======
+
         addPhotoButton.setOnClickListener {
             if (recording.value == true || JourneyManager.currentItinerary != null) {
                 showPhotoChoiceDialog()
@@ -202,7 +195,6 @@ class HomeFragment : Fragment() {
             }
         }
 
->>>>>>> refs/remotes/origin/main
     }
 
 
