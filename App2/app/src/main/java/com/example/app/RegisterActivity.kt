@@ -1,7 +1,9 @@
 package com.example.app
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.view.MotionEvent
 import android.widget.ImageView
 import android.widget.TextView
@@ -9,21 +11,47 @@ import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import com.example.app.databinding.ActivityRegisterBinding
+import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
+import com.google.firebase.storage.FirebaseStorage
 
 class RegisterActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityRegisterBinding
     private lateinit var fireAuth: FirebaseAuth
+
+    // Initialize Firebase Realtime Database
+    private lateinit var database: FirebaseDatabase
+    private lateinit var usersRef: DatabaseReference // Référence spécifique à "users"
+
+    private lateinit var imageUri : Uri
+
     private var isShowPassword = false
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        fireAuth = FirebaseAuth.getInstance()
         binding = ActivityRegisterBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+
+        // Initialize Firebase Storage reference
+        var myRef = FirebaseStorage.getInstance().reference
+
+        // referece database firebase for writing or reading data
+        database = FirebaseDatabase.getInstance()
+
+        // Pointe vers users
+        usersRef = database.getReference("users")
+
+
+        // Initialize Firebase Auth
+        fireAuth = FirebaseAuth.getInstance()
 
         //return to login
         binding.alreadyHaveAccount.setOnClickListener {
@@ -31,9 +59,10 @@ class RegisterActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
-
+        // Fonction pour afficher ou masquer le password
         // Détecter le clic sur l'icône drawableRight[2] [0 left, 1 top, 2 right, 3 bottom]
         // _ = view ( (EditText) qui reçoit l'événement), event = un objet MotionEvent qui contient les informations sur l'événement (clic, déplacement, relachement, etc.)
+
         binding.inputPasswordR.setOnTouchListener { _, event ->
             // Vérifier si l'événement est un clic sur l'icône (l'utilisateur relâche son doigt après un clic.)
             if (event.action == MotionEvent.ACTION_UP) {
@@ -63,30 +92,46 @@ class RegisterActivity : AppCompatActivity() {
 
         //Sing up
         binding.btnSingup.setOnClickListener {
+            val firstName = binding.inputFirstName.text.toString()
+            val lastName = binding.inputLastName.text.toString()
             val email = binding.inputEmailR.text.toString()
             val pass = binding.inputPasswordR.text.toString()
             val confirmpass = binding.inputConfirmpasswordR.text.toString()
 
-            if (email.isNotEmpty() && pass.isNotEmpty() && confirmpass.isNotEmpty()){
-                if (pass == confirmpass){
-                    fireAuth.createUserWithEmailAndPassword(email,pass).addOnCompleteListener{
-                        if (it.isSuccessful){
-                            val intent = Intent(this, MainActivity::class.java)
-                            startActivity(intent)
-                            finish()
-
-                        }else{
-                            Toast.makeText(this, it.exception.toString(), Toast.LENGTH_SHORT).show()
+            if (email.isNotEmpty() && pass.isNotEmpty() && confirmpass.isNotEmpty()) {
+                if (pass == confirmpass) {
+                    fireAuth.createUserWithEmailAndPassword(email, pass)
+                        .addOnCompleteListener { authTask ->
+                            if (authTask.isSuccessful) {
+                                // Récupération du user APRÈS création réussie
+                                val firebaseUser = fireAuth.currentUser
+                                firebaseUser?.let { user ->
+                                    saveUserData(
+                                        uid = user.uid,
+                                        firstName = firstName,
+                                        lastName = lastName,
+                                        email = email
+                                    )
+                                    Toast.makeText(this, "Account created", Toast.LENGTH_SHORT).show()
+                                    startActivity(Intent(this, MainActivity::class.java))
+                                    finish()
+                                }
+                            } else {
+                                Toast.makeText(
+                                    this,
+                                    "Error: ${authTask.exception?.message}",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
                         }
-
-                    }
-                }else{
-                    Toast.makeText(this, "Password is not matching", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(this, "Password mismatch", Toast.LENGTH_SHORT).show()
                 }
-            }else{
-                Toast.makeText(this, "Empty Fields Are not Allowed !!", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(this, "Empty fields not allowed", Toast.LENGTH_SHORT).show()
             }
         }
+
 
         //return to login with back button
         binding.back.setOnClickListener {
@@ -108,6 +153,20 @@ class RegisterActivity : AppCompatActivity() {
         })
 
     }
+
+
+    private fun saveUserData(uid: String, firstName: String, lastName: String, email: String) {
+        val user = User(firstName, lastName, email)
+        usersRef.child(uid).setValue(user)
+            .addOnSuccessListener {
+                Log.d("Firebase", "Data saved successfully")
+            }
+            .addOnFailureListener { e ->
+                Log.e("Firebase", "Save failed", e)
+                Toast.makeText(this, "Failed to save: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
+    }
+
 
     // Fonction pour afficher ou masquer le password
     fun showPassword(isShown: Boolean) {
@@ -144,5 +203,6 @@ class RegisterActivity : AppCompatActivity() {
             R.drawable.security, 0, drawableEnd, 0
         )
     }
+
 
 }

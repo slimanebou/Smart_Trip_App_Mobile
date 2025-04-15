@@ -51,11 +51,8 @@ dependencies {
     // Add the dependency for the Firebase Authentication library
     implementation(libs.firebase.auth)
 
-
-
     //Add the dependency sign in with google
     implementation(libs.play.services.auth)
-
 
     implementation(libs.androidx.credentials)
     implementation(libs.androidx.credentials.play.services.auth)
@@ -63,6 +60,8 @@ dependencies {
     implementation(libs.play.services.location)
     implementation(libs.androidx.preference.ktx)
     implementation(libs.androidx.scenecore)
+    implementation(libs.firebase.database.ktx)
+    implementation(libs.firebase.storage.ktx)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

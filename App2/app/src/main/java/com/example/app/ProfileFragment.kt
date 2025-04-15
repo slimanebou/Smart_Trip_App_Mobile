@@ -15,11 +15,9 @@ class ProfileFragment : Fragment() {
 
     // Déclaration un variable mutable binding pour FragmentProfileBinding pour gerer les cycles de vie
     // _ c'est une convention Kotlin pour indique la version brute (comme * en rust)
-    // ? c'est une convention Kotlin pour indique que la variable peut être null
     private var _binding: FragmentProfileBinding? = null
 
     // Déclaration une variable immutable (propriété en lecture seule) binding pour FragmentProfileBinding pour gerer les cycles de vie
-    // !! c'est une convention Kotlin pour indique que la variable ne peut pas être null
     private val binding get() = _binding!!
 
     private lateinit var auth: FirebaseAuth

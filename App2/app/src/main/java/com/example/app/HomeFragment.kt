@@ -12,6 +12,7 @@ import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
 import com.example.app.MainActivity.Companion.recording
+import com.example.app.databinding.FragmentHomeBinding
 import com.example.app.utils.MapConfigurator
 import com.example.app.helpers.PermissionHelper
 import com.example.app.managers.JourneyManager
@@ -19,10 +20,29 @@ import com.example.app.managers.MapManager
 import com.example.app.service.GpsTrackingService
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 
 class HomeFragment : Fragment() {
+
+    // Déclaration un variable mutable binding pour FragmentProfileBinding pour gerer les cycles de vie
+    // _ c'est une convention Kotlin pour indique la version brute (comme * en rust)
+    private var _binding: FragmentHomeBinding? = null
+
+    // Déclaration une variable immutable (propriété en lecture seule) binding pour FragmentProfileBinding pour gerer les cycles de vie
+    private val binding get() = _binding!!
+
+
+    // Initialize Firebase Realtime Database
+    private lateinit var database: FirebaseDatabase
+    private lateinit var usersRef: DatabaseReference // Référence spécifique à "users"
+
 
     private lateinit var mapView: MapView
     private lateinit var fusedLocationClient: FusedLocationProviderClient
@@ -35,12 +55,14 @@ class HomeFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        return inflater.inflate(R.layout.fragment_home, container, false)
+        _binding = FragmentHomeBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
     @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
 
         // Initialisation
         mapView = view.findViewById(R.id.mapView)
@@ -74,9 +96,40 @@ class HomeFragment : Fragment() {
             hideMap()
             PermissionHelper.requestLocationPermission(this)
         }
+
+
+
+        // referece database firebase for writing or reading data
+        database = FirebaseDatabase.getInstance()
+
+        // Pointe vers users
+        usersRef = database.getReference("users")
+
+        // Récupère l'UID de l'utilisateur connecté
+        val currentUserUid = FirebaseAuth.getInstance().currentUser
+
+        currentUserUid?.let { user ->
+            val uid = user.uid
+
+            // Écoute les données de l'utilisateur spécifique
+            usersRef.child(uid).addValueEventListener(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    // Récupération directe du champ
+                    val firstName = snapshot.child("firstName").value?.toString()
+                        binding.textView2.text = "Hi, $firstName"
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                    Toast.makeText(requireContext(),
+                        "Erreur de lecture: ${error.message}",
+                        Toast.LENGTH_SHORT).show()
+                }
+            })
+        }
     }
 
-    private fun setupButtons(isRecording: Boolean) {
+
+        private fun setupButtons(isRecording: Boolean) {
         if (isRecording) {
             pauseButton.visibility = View.VISIBLE
             resumeButton.visibility = View.GONE
