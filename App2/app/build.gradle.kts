@@ -60,8 +60,12 @@ dependencies {
     implementation(libs.play.services.location)
     implementation(libs.androidx.preference.ktx)
     implementation(libs.androidx.scenecore)
+<<<<<<< HEAD
     implementation(libs.firebase.database.ktx)
     implementation(libs.firebase.storage.ktx)
+=======
+    implementation(libs.androidx.exifinterface)
+>>>>>>> refs/remotes/origin/main
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

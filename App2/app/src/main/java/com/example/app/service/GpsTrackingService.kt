@@ -14,12 +14,14 @@ import com.google.android.gms.location.*
 import org.osmdroid.util.GeoPoint
 import java.util.concurrent.TimeUnit
 import com.example.app.managers.JourneyManager
+import com.example.app.managers.PointOfInterestDetector
 
 class GpsTrackingService : Service() {
 
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var locationRequest: LocationRequest
     private lateinit var locationCallback: LocationCallback
+    private lateinit var poiDetector: PointOfInterestDetector
 
     override fun onCreate() {
         super.onCreate()
@@ -29,15 +31,20 @@ class GpsTrackingService : Service() {
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
         // Définition de la fréquence : toutes les 15 minutes
-        locationRequest = LocationRequest.Builder(
+ /*       locationRequest = LocationRequest.Builder(
             Priority.PRIORITY_HIGH_ACCURACY,
             TimeUnit.MINUTES.toMillis(10)
         ).build()
-/*
+
+  */
+
         locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 5000L)
             .setMinUpdateIntervalMillis(5000L)
             .build()
-*/
+
+
+
+        poiDetector = PointOfInterestDetector(JourneyManager.currentItinerary!!)
 
         // Callback de localisation
         locationCallback = object : LocationCallback() {
@@ -56,6 +63,7 @@ class GpsTrackingService : Service() {
 
                     //  Ajouter à l'itinéraire si il existe
                     JourneyManager.currentItinerary?.it_points?.add(newPoint)
+                    poiDetector.processLocationUpdate(newPoint)
                 }
             }
         }
