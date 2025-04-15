@@ -180,7 +180,7 @@ class HomeFragment : Fragment() {
                 }
 
                 override fun onCancelled(error: DatabaseError) {
-                    
+
                 }
             })
         }

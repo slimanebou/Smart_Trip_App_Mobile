@@ -17,6 +17,7 @@ import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential.Companion.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
+import com.google.firebase.database.FirebaseDatabase
 import kotlinx.coroutines.launch
 
 class LoginActivity : AppCompatActivity() {
@@ -99,27 +100,35 @@ class LoginActivity : AppCompatActivity() {
     }
 
 
-    //    --------------------------------------------------------------------------------------------------
+    // Fonction pour lancer l'authentification Google
     private fun signInWithGoogle() {
         lifecycleScope.launch {
             try {
+                // On prépare une option de connexion avec Google
                 val googleIdOption = GetGoogleIdOption.Builder()
+
+                    // On demande un ID Token (ID client de ton projet Firebase)
                     .setServerClientId(getString(R.string.default_web_client_id))
+
+                    // Affiche tous les comptes Google, pas seulement ceux déjà connectés
                     .setFilterByAuthorizedAccounts(false)
                     .build()
 
+                // On crée une requête de connexion avec cette option
                 val request = GetCredentialRequest.Builder()
                     .addCredentialOption(googleIdOption)
                     .build()
 
+                // On déclenche la demande de connexion
                 val response = credentialManager.getCredential(
                     request = request,
                     context = this@LoginActivity,
                 )
 
+                // Si la connexion réussit, on traite le résultat
                 handleSignIn(response.credential)
+
             } catch (e: GetCredentialException) {
-                Log.e(TAG, "Google sign-in failed", e)
                 Toast.makeText(
                     this@LoginActivity,
                     "Google sign-in failed: ${e.message}",
@@ -129,30 +138,72 @@ class LoginActivity : AppCompatActivity() {
         }
     }
 
+    // Fonction pour traiter le résultat de la connexion Google
     private fun handleSignIn(credential: Credential) {
+        // Vérifie si le credential est bien de type Google ID token
         if (credential is CustomCredential && credential.type == TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
             try {
+                // On extrait le token Google depuis les données du credential
                 val googleIdTokenCredential = GoogleIdTokenCredential.createFrom(credential.data)
+
+                // On lance l'authentification Firebase avec ce token
                 firebaseAuthWithGoogle(googleIdTokenCredential.idToken)
+
             } catch (e: Exception) {
-                Log.e(TAG, "Error parsing Google ID token", e)
                 Toast.makeText(this, "Error processing Google sign-in", Toast.LENGTH_SHORT).show()
             }
-        } else {
-            Log.w(TAG, "Unexpected credential type: ${credential::class.java}")
         }
     }
 
+    // Fonction pour authentifier Firebase avec un token Google
     private fun firebaseAuthWithGoogle(idToken: String) {
+
+        // On crée un objet de type GoogleAuthProvider à partir du token
         val credential = GoogleAuthProvider.getCredential(idToken, null)
+
+        // Connexion Firebase avec ce credential
         fireAuth.signInWithCredential(credential)
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
-                    Log.d(TAG, "signInWithCredential:success")
+                    // utilisateur connecté
+                    val user = fireAuth.currentUser
+
+                    // ?.let{} S'exécute SEULEMENT si currentUserUid n'est pas null
+                    user?.let {
+                        // Récupère les données de l'utilisateur Google connecté
+                        val email = it.email              // "jean.dupont@gmail.com"
+
+                        val name = it.displayName         // "Jean Dupont"
+                        val firstName = name?.split(" ")?.firstOrNull() // "Jean"
+                        val lastName = name?.split(" ")?.drop(1)?.joinToString(" ") // "Dupont"
+
+                        // Map contenant les données à sauvegarder
+                        val userMap = mapOf(
+                            "firstName" to firstName,
+                            "lastName" to lastName,
+                            "email" to email
+                        )
+
+                        // UID Firebase de l'utilisateur
+                        val uid = user.uid
+
+                        // Sauvegarde des données dans la base Realtime Database
+                        FirebaseDatabase.getInstance().getReference("users")
+                            .child(uid)
+                            .setValue(userMap)
+                            .addOnCompleteListener { dbTask ->
+                                if (dbTask.isSuccessful) {
+                                    Log.d(TAG, "User info saved to database")
+                                } else {
+                                    Log.e(TAG, "Failed to save user info", dbTask.exception)
+                                }
+                            }
+                    }
+
                     startActivity(Intent(this, MainActivity::class.java))
                     finish()
+
                 } else {
-                    Log.w(TAG, "signInWithCredential:failure", task.exception)
                     Toast.makeText(
                         this,
                         "Authentication failed: ${task.exception?.message}",
