@@ -180,9 +180,7 @@ class HomeFragment : Fragment() {
                 }
 
                 override fun onCancelled(error: DatabaseError) {
-                    Toast.makeText(requireContext(),
-                        "Erreur de lecture: ${error.message}",
-                        Toast.LENGTH_SHORT).show()
+                    
                 }
             })
         }

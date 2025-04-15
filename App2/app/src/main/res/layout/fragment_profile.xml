@@ -76,20 +76,26 @@
                 android:textAlignment="center" />
 
             <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/settingsLayout"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_marginEnd="32dp"
                 android:layout_marginStart="32dp"
-                android:layout_marginTop="16dp"
-                android:layout_marginBottom="8dp">
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="8dp"
+                android:background="@drawable/background_click"
+                android:clickable="true"
+                android:focusable="true"
+                android:padding="5dp">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:id="@+id/constraintLayoutSettings"
                     android:layout_width="50dp"
                     android:layout_height="50dp"
                     android:background="@drawable/background_oval_share"
+                    app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    tools:ignore="MissingConstraints">
+                    app:layout_constraintTop_toTopOf="parent">
 
                     <ImageView
                         android:id="@+id/imageSettings"
@@ -99,7 +105,7 @@
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
-                        app:srcCompat="@drawable/profile" />
+                        app:srcCompat="@drawable/setting" />
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
                 <ImageView
@@ -126,21 +132,28 @@
                     app:layout_constraintStart_toEndOf="@+id/constraintLayoutSettings"
                     app:layout_constraintTop_toTopOf="@+id/constraintLayoutSettings" />
             </androidx.constraintlayout.widget.ConstraintLayout>
+
             <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/myFavoriteLayout"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_marginEnd="32dp"
                 android:layout_marginStart="32dp"
-                android:layout_marginTop="16dp"
-                android:layout_marginBottom="8dp">
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="8dp"
+                android:background="@drawable/background_click"
+                android:clickable="true"
+                android:focusable="true"
+                android:padding="5dp">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:id="@+id/constraintLayoutMyFavorite"
                     android:layout_width="50dp"
                     android:layout_height="50dp"
                     android:background="@drawable/background_oval_share"
+                    app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    tools:ignore="MissingConstraints">
+                    app:layout_constraintTop_toTopOf="parent">
 
                     <ImageView
                         android:id="@+id/imageMyFavorite"
@@ -170,7 +183,6 @@
                     android:layout_marginTop="16dp"
                     android:layout_marginBottom="16dp"
                     android:text="My Favorites"
-
                     android:textColor="@color/dark_blue"
                     android:textSize="20sp"
                     android:textStyle="bold"
@@ -178,21 +190,28 @@
                     app:layout_constraintStart_toEndOf="@+id/constraintLayoutMyFavorite"
                     app:layout_constraintTop_toTopOf="@+id/constraintLayoutMyFavorite" />
             </androidx.constraintlayout.widget.ConstraintLayout>
+
             <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/languageLayout"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_marginEnd="32dp"
                 android:layout_marginStart="32dp"
-                android:layout_marginTop="16dp"
-                android:layout_marginBottom="8dp">
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="8dp"
+                android:background="@drawable/background_click"
+                android:clickable="true"
+                android:focusable="true"
+                android:padding="5dp">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:id="@+id/constraintLayoutLanguage"
                     android:layout_width="50dp"
                     android:layout_height="50dp"
                     android:background="@drawable/background_oval_share"
+                    app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    tools:ignore="MissingConstraints">
+                    app:layout_constraintTop_toTopOf="parent">
 
                     <ImageView
                         android:id="@+id/imageLanguage"
@@ -229,21 +248,28 @@
                     app:layout_constraintStart_toEndOf="@+id/constraintLayoutLanguage"
                     app:layout_constraintTop_toTopOf="@+id/constraintLayoutLanguage" />
             </androidx.constraintlayout.widget.ConstraintLayout>
+
             <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/myTripsLayout"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_marginEnd="32dp"
                 android:layout_marginStart="32dp"
-                android:layout_marginTop="16dp"
-                android:layout_marginBottom="8dp">
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="8dp"
+                android:background="@drawable/background_click"
+                android:clickable="true"
+                android:focusable="true"
+                android:padding="5dp">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:id="@+id/constraintLayoutShare"
                     android:layout_width="50dp"
                     android:layout_height="50dp"
                     android:background="@drawable/background_oval_share"
+                    app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    tools:ignore="MissingConstraints">
+                    app:layout_constraintTop_toTopOf="parent">
 
                     <ImageView
                         android:id="@+id/imageMyTrips"
@@ -273,7 +299,6 @@
                     android:layout_marginTop="16dp"
                     android:layout_marginBottom="16dp"
                     android:text="My Trips"
-
                     android:textColor="@color/dark_blue"
                     android:textSize="20sp"
                     android:textStyle="bold"
@@ -287,16 +312,21 @@
                 android:layout_height="match_parent"
                 android:layout_marginEnd="32dp"
                 android:layout_marginStart="32dp"
-                android:layout_marginTop="16dp"
-                android:layout_marginBottom="8dp">
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="8dp"
+                android:background="@drawable/background_click"
+                android:clickable="true"
+                android:focusable="true"
+                android:padding="5dp">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:id="@+id/constraintLayoutLogout"
                     android:layout_width="50dp"
                     android:layout_height="50dp"
                     android:background="@drawable/background_oval_share"
+                    app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    tools:ignore="MissingConstraints">
+                    app:layout_constraintTop_toTopOf="parent">
 
                     <ImageView
                         android:id="@+id/imageLogout"
@@ -326,7 +356,6 @@
                     android:layout_marginTop="16dp"
                     android:layout_marginBottom="16dp"
                     android:text="Logout"
-
                     android:textColor="@color/dark_blue"
                     android:textSize="20sp"
                     android:textStyle="bold"

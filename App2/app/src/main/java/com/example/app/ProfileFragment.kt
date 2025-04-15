@@ -47,11 +47,36 @@ class ProfileFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        auth = FirebaseAuth.getInstance()
+        // Détection du clic sur le bouton de my trips
+        binding.myTripsLayout.setOnClickListener {
+            animation(it)
+        }
 
+        // Détection du clic sur le bouton de langue
+        binding.languageLayout.setOnClickListener {
+            animation(it)
+        }
+
+        // Détection du clic sur le bouton de my favorite
+        binding.myFavoriteLayout.setOnClickListener {
+            animation(it)
+            val intent = Intent(requireActivity(), FavoriteFragment::class.java)
+        }
+
+        // Détection du clic sur le bouton de update profil
+        binding.settingsLayout.setOnClickListener {
+            animation(it)
+        }
+
+        // Détection du clic sur le bouton de déconnexion
         binding.logoutLayout.setOnClickListener {
+            animation(it)
             showLogoutConfirmationDialog()
         }
+
+
+
+        auth = FirebaseAuth.getInstance()
 
         // referece database firebase for writing or reading data
         database = FirebaseDatabase.getInstance()
@@ -78,14 +103,25 @@ class ProfileFragment : Fragment() {
                 }
 
                 override fun onCancelled(error: DatabaseError) {
-                    Toast.makeText(requireContext(),
-                        "Erreur de lecture: ${error.message}",
-                        Toast.LENGTH_SHORT).show()
+
                 }
             })
         }
 
 
+    }
+
+    private fun animation(it : View) {
+        it.animate()
+            .scaleX(0.9f)
+            .scaleY(0.9f)
+            .setDuration(100)
+            .withEndAction {
+                it.animate()
+                    .scaleX(1f)
+                    .scaleY(1f)
+                    .setDuration(100)
+            }
     }
 
     // Création d'un AlertDialog avec un style
