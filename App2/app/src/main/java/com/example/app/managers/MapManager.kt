@@ -2,10 +2,13 @@ package com.example.app.managers
 
 import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.Canvas
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.widget.ImageView
+import androidx.annotation.DrawableRes
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
 import com.example.app.R
@@ -44,8 +47,7 @@ object MapManager {
             position = itinerary.it_points.first()
             title = "Départ"
             setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
-            val drawable = ContextCompat.getDrawable(mapView.context, R.drawable.ic_start_marker)
-            icon = drawable?.let { resizeDrawable(it, 48, 48) }
+            icon = resizeIcon(mapView.context, R.drawable.ic_start_marker, 48, 48)
         }
         mapView.overlays.add(startMarker)
 
@@ -54,8 +56,7 @@ object MapManager {
             position = itinerary.it_points.last()
             title = "Arrivée"
             setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
-            val drawable = ContextCompat.getDrawable(mapView.context, R.drawable.ic_end_marker)
-            icon = drawable?.let { resizeDrawable(it, 48, 48) }
+            icon = resizeIcon(mapView.context, R.drawable.ic_end_marker, 48, 48)
         }
         mapView.overlays.add(endMarker)
 
@@ -65,8 +66,7 @@ object MapManager {
                 position = poi.location
                 title = poi.name
                 setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
-                val drawable = ContextCompat.getDrawable(mapView.context, R.drawable.ic_poi_marker)
-                icon = drawable?.let { resizeDrawable(it, 48, 48) }
+                icon = resizeIcon(mapView.context, R.drawable.ic_poi_marker, 48, 48)
             }
             mapView.overlays.add(poiMarker)
         }
@@ -78,8 +78,7 @@ object MapManager {
                     position = photo.position
                     title = "Photo"
                     setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
-                    val drawable = ContextCompat.getDrawable(mapView.context, R.drawable.ic_photo_marker)
-                    icon = drawable?.let { resizeDrawable(it, 48, 48) }
+                    icon = resizeIcon(mapView.context, R.drawable.ic_photo_marker, 48, 48)
                     setOnMarkerClickListener { marker, _ ->
                         photo.uri?.let { uri ->
                             showPhotoDialog(mapView.context, uri)
@@ -116,11 +115,18 @@ object MapManager {
             .show()
     }
 
-    private fun resizeDrawable(drawable: Drawable, width: Int, height: Int): Drawable {
-        val bitmap = (drawable as BitmapDrawable).bitmap
-        val resized = Bitmap.createScaledBitmap(bitmap, width, height, false)
-        return BitmapDrawable(resized)
+    private fun resizeIcon(context: Context, @DrawableRes resId: Int, widthDp: Int, heightDp: Int): BitmapDrawable? {
+        val drawable = ContextCompat.getDrawable(context, resId) ?: return null
+        val metrics = context.resources.displayMetrics
+        val widthPx = (widthDp * metrics.density).toInt()
+        val heightPx = (heightDp * metrics.density).toInt()
+        val bitmap = Bitmap.createBitmap(widthPx, heightPx, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(bitmap)
+        drawable.setBounds(0, 0, canvas.width, canvas.height)
+        drawable.draw(canvas)
+        return BitmapDrawable(context.resources, bitmap)
     }
+
 
 
 
