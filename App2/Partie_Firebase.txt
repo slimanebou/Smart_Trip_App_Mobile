@@ -1,0 +1,340 @@
+
+FirebaseManager.kt – Gestion Auth & Firestore
+
+
+package com.example.smarttrip.firebase
+
+import android.util.Log
+import com.google.firebase.Timestamp
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.auth.UserProfileChangeRequest
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.GeoPoint
+
+class FirebaseManager {
+
+    private val auth = FirebaseAuth.getInstance()
+    private val db = FirebaseFirestore.getInstance()
+
+    // 🔐 Authentification
+    fun connexionEmail(email: String, password: String, onResult: (FirebaseUser?) -> Unit) {
+        auth.signInWithEmailAndPassword(email, password)
+            .addOnCompleteListener { task ->
+                onResult(task.result?.user ?: run {
+                    Log.e("Firebase", "Connexion échouée : ${task.exception?.message}")
+                    null
+                })
+            }
+    }
+
+    fun inscriptionEmail(email: String, password: String, nom: String, onResult: (FirebaseUser?) -> Unit) {
+        auth.createUserWithEmailAndPassword(email, password)
+            .addOnCompleteListener { task ->
+                val user = task.result?.user
+                if (user != null) {
+                    user.updateProfile(UserProfileChangeRequest.Builder().setDisplayName(nom).build())
+                    ajouterUtilisateur(user.uid, nom, email)
+                    onResult(user)
+                } else {
+                    Log.e("Firebase", "Erreur inscription : ${task.exception?.message}")
+                    onResult(null)
+                }
+            }
+    }
+
+    private fun ajouterUtilisateur(userId: String, nom: String, email: String) {
+        val userRef = db.collection("Utilisateurs").document(userId)
+        userRef.get().addOnSuccessListener { doc ->
+            if (!doc.exists()) {
+                val data = hashMapOf("nom" to nom, "email" to email, "photo_profil" to null)
+                userRef.set(data)
+            }
+        }
+    }
+
+    // 🌍 Ajout d'un voyage
+    fun ajouterVoyage(userId: String, voyageId: String, titre: String, description: String, dateDepart: String, dateFin: String, status: String) {
+        val voyage = hashMapOf(
+            "titre" to titre,
+            "description" to description,
+            "date_depart" to Timestamp.now(), // remplacer par parsing si nécessaire
+            "date_fin" to Timestamp.now(),
+            "status" to status
+        )
+
+        db.collection("Utilisateurs")
+            .document(userId)
+            .collection("voyages")
+            .document(voyageId)
+            .set(voyage)
+    }
+
+    // 📍 Ajouter un point d’intérêt
+    fun ajouterEntree(
+        userId: String, voyageId: String,
+        type: String, lat: Double, lng: Double,
+        timestamp: Timestamp, photoUrl: String, description: String
+    ) {
+        val entree = hashMapOf(
+            "type" to type,
+            "position" to GeoPoint(lat, lng),
+            "timestamp" to timestamp,
+            "photo_url" to photoUrl,
+            "description" to description
+        )
+
+        db.collection("Utilisateurs")
+            .document(userId)
+            .collection("voyages")
+            .document(voyageId)
+            .collection("entrées")
+            .add(entree)
+    }
+
+    // 🔁 Lecture des points
+    fun lireEntreesVoyage(userId: String, voyageId: String) {
+        db.collection("Utilisateurs")
+            .document(userId)
+            .collection("voyages")
+            .document(voyageId)
+            .collection("entrées")
+            .get()
+            .addOnSuccessListener { result ->
+                result.forEach {
+                    Log.d("Firebase", "${it.id} => ${it.data}")
+                }
+            }
+    }
+
+fun getListeVoyages(userId: String, onResult: (List<Map<String, Any>>) -> Unit) {
+    db.collection("Utilisateurs")
+        .document(userId)
+        .collection("voyages")
+        .get()
+        .addOnSuccessListener { result ->
+            val voyages = result.documents.map { it.data ?: emptyMap() }
+            onResult(voyages)
+        }
+        .addOnFailureListener {
+            Log.e("Firebase", "Erreur récupération voyages : ${it.message}")
+            onResult(emptyList())
+        }
+}
+
+fun getTrajet(userId: String, voyageId: String, onResult: (List<GeoPoint>) -> Unit) {
+    db.collection("Utilisateurs")
+        .document(userId)
+        .collection("voyages")
+        .document(voyageId)
+        .collection("entrées")
+        .get()
+        .addOnSuccessListener { snapshot ->
+            val points = snapshot.documents
+                .mapNotNull { it.getGeoPoint("position") }
+            onResult(points)
+        }
+        .addOnFailureListener {
+            Log.e("Firebase", "Erreur récupération trajet : ${it.message}")
+            onResult(emptyList())
+        }
+}
+
+fun ecouterEntreesEnTempsReel(userId: String, voyageId: String, onUpdate: (List<Map<String, Any>>) -> Unit) {
+    db.collection("Utilisateurs")
+        .document(userId)
+        .collection("voyages")
+        .document(voyageId)
+        .collection("entrées")
+        .addSnapshotListener { snapshots, e ->
+            if (e != null || snapshots == null) {
+                Log.e("Firebase", "Erreur écoute entrées : ${e?.message}")
+                return@addSnapshotListener
+            }
+
+            val data = snapshots.documents.mapNotNull { it.data }
+            onUpdate(data)
+        }
+}
+
+
+fun supprimerVoyage(userId: String, voyageId: String, onComplete: (Boolean) -> Unit) {
+    val voyageRef = db.collection("Utilisateurs").document(userId).collection("voyages").document(voyageId)
+    
+    // Supprimer d’abord toutes les entrées
+    voyageRef.collection("entrées")
+        .get()
+        .addOnSuccessListener { snapshot ->
+            val batch = db.batch()
+            snapshot.forEach { doc -> batch.delete(doc.reference) }
+
+            batch.commit().addOnSuccessListener {
+                // Puis supprimer le voyage
+                voyageRef.delete().addOnSuccessListener {
+                    onComplete(true)
+                }.addOnFailureListener {
+                    onComplete(false)
+                }
+            }.addOnFailureListener {
+                onComplete(false)
+            }
+        }
+        .addOnFailureListener {
+            onComplete(false)
+        }
+}
+
+
+
+fun getEntreesParType(userId: String, voyageId: String, type: String, onResult: (List<Map<String, Any>>) -> Unit) {
+    db.collection("Utilisateurs")
+        .document(userId)
+        .collection("voyages")
+        .document(voyageId)
+        .collection("entrées")
+        .whereEqualTo("type", type)
+        .get()
+        .addOnSuccessListener { result ->
+            val entrees = result.documents.mapNotNull { it.data }
+            onResult(entrees)
+        }
+        .addOnFailureListener {
+            Log.e("Firebase", "Erreur récupération entrées par type : ${it.message}")
+            onResult(emptyList())
+        }
+}
+
+}
+
+
+
+
+
+FirebaseStorageHelper.kt – Upload d’image
+
+
+
+package com.example.smarttrip.firebase
+
+import android.net.Uri
+import android.util.Log
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
+import java.util.*
+
+object FirebaseStorageHelper {
+
+    fun uploadPhotoToFirebase(
+        imageUri: Uri,
+        voyageId: String,
+        lat: Double,
+        lng: Double,
+        description: String,
+        onSuccess: () -> Unit,
+        onFailure: (Exception) -> Unit
+    ) {
+        val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return onFailure(Exception("Utilisateur non connecté"))
+
+        val fileName = UUID.randomUUID().toString() + ".jpg"
+        val photoRef = FirebaseStorage.getInstance().reference.child("photos/$userId/$voyageId/$fileName")
+
+        photoRef.putFile(imageUri)
+            .addOnSuccessListener {
+                photoRef.downloadUrl.addOnSuccessListener { downloadUrl ->
+                    val firestore = FirebaseFirestore.getInstance()
+                    val pointInteret = hashMapOf(
+                        "type" to "photo",
+                        "photo_url" to downloadUrl.toString(),
+                        "description" to description,
+                        "timestamp" to System.currentTimeMillis(),
+                        "position" to mapOf("lat" to lat, "lng" to lng)
+                    )
+
+                    firestore.collection("users")
+                        .document(userId)
+                        .collection("voyages")
+                        .document(voyageId)
+                        .collection("points_interet")
+                        .add(pointInteret)
+                        .addOnSuccessListener { onSuccess() }
+                        .addOnFailureListener { onFailure(it) }
+                }
+            }
+            .addOnFailureListener { onFailure(it) }
+    }
+}
+
+
+
+
+
+Exemple dans MainActivity.kt
+
+
+
+class MainActivity : AppCompatActivity() {
+
+    private lateinit var firebaseManager: FirebaseManager
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+
+        firebaseManager = FirebaseManager()
+
+        firebaseManager.inscriptionEmail("test@email.com", "password123", "Nom Test") { user ->
+            if (user != null) {
+                Log.d("Auth", "Inscrit : ${user.email}")
+            }
+        }
+    }
+
+    // Appeler ce code dans un bouton pour choisir une photo
+    private fun ouvrirGalerie() {
+        val pickImage = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+            uri?.let {
+                FirebaseStorageHelper.uploadPhotoToFirebase(
+                    imageUri = it,
+                    voyageId = "voyage123",
+                    lat = 48.8566,
+                    lng = 2.3522,
+                    description = "Tour Eiffel",
+                    onSuccess = {
+                        Toast.makeText(this, "Image uploadée", Toast.LENGTH_SHORT).show()
+                    },
+                    onFailure = {
+                        Toast.makeText(this, "Erreur : ${it.message}", Toast.LENGTH_SHORT).show()
+                    }
+                )
+            }
+        }
+        pickImage.launch("image/*")
+    }
+}
+
+
+
+
+
+Téléchargement ou affichage d’image depuis Firebase Storage
+
+fun chargerImage(context: Context, imageUrl: String, imageView: ImageView) {
+    Glide.with(context)
+        .load(imageUrl)
+        .into(imageView)
+}
+
+
+
+
+Fonction pour écouter en temps réel (si nécessaire)
+
+fun ecouterVoyages(userId: String, onUpdate: (List<Voyage>) -> Unit) {
+    db.collection("Utilisateurs").document(userId).collection("voyages")
+        .addSnapshotListener { snapshots, e ->
+            if (e != null) return@addSnapshotListener
+            val voyages = snapshots?.toObjects(Voyage::class.java)
+            if (voyages != null) onUpdate(voyages)
+        }
+}
