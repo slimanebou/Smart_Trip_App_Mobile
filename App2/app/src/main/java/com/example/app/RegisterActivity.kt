@@ -19,6 +19,7 @@ import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.firestore.FirebaseFirestore
 
 class RegisterActivity : AppCompatActivity() {
 
@@ -112,6 +113,7 @@ class RegisterActivity : AppCompatActivity() {
                                         lastName = lastName,
                                         email = email
                                     )
+
                                     Toast.makeText(this, "Account created", Toast.LENGTH_SHORT).show()
                                     startActivity(Intent(this, MainActivity::class.java))
                                     finish()
@@ -165,6 +167,30 @@ class RegisterActivity : AppCompatActivity() {
                 Log.e("Firebase", "Save failed", e)
                 Toast.makeText(this, "Failed to save: ${e.message}", Toast.LENGTH_SHORT).show()
             }
+
+        // ✅ Firestore
+        val firestore = FirebaseFirestore.getInstance()
+        val userMap = hashMapOf(
+            "name" to "$firstName $lastName",
+            "email" to email,
+            "profilePicture" to null, // Tu peux le mettre à jour plus tard si tu ajoutes une photo
+            "settings" to mapOf(
+                "batterySaver" to true,
+                "gpsInterval" to 5
+            )
+        )
+
+        firestore.collection("users").document(uid).set(userMap)
+            .addOnSuccessListener {
+                Log.d("Firestore", "User added to Firestore!")
+                Toast.makeText(this, "Firestore: User saved", Toast.LENGTH_SHORT).show()
+            }
+            .addOnFailureListener { e ->
+                Log.e("Firestore", "Failed to save user to Firestore", e)
+                Toast.makeText(this, "Firestore error: ${e.message}", Toast.LENGTH_LONG).show()
+            }
+        Log.d("RegisterActivity", "Trying to save Firestore user with uid=$uid")
+
     }
 
 

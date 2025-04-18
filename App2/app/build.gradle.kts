@@ -78,6 +78,7 @@ dependencies {
     implementation("com.google.firebase:firebase-appcheck-debug")
 
 
+
     //Dependencies of OSM
     implementation(libs.osmdroid.android)
 
