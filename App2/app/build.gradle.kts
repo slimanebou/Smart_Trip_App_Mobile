@@ -2,6 +2,8 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.google.gms.google.services)
+    id("kotlin-kapt")
+
 }
 
 android {
@@ -42,6 +44,7 @@ android {
 
 dependencies {
 
+    implementation(platform("com.google.firebase:firebase-bom:32.8.0"))
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
@@ -49,7 +52,7 @@ dependencies {
     implementation(libs.androidx.constraintlayout)
 
     // Add the dependency for the Firebase Authentication library
-    implementation(libs.firebase.auth)
+    implementation("com.google.firebase:firebase-auth")
 
     //Add the dependency sign in with google
     implementation(libs.play.services.auth)
@@ -60,13 +63,22 @@ dependencies {
     implementation(libs.play.services.location)
     implementation(libs.androidx.preference.ktx)
     implementation(libs.androidx.scenecore)
-    implementation(libs.firebase.database.ktx)
-    implementation(libs.firebase.storage.ktx)
+    implementation("com.google.firebase:firebase-database-ktx")
+    implementation("com.google.firebase:firebase-storage-ktx")
+    implementation("com.google.firebase:firebase-firestore-ktx")
     implementation(libs.androidx.exifinterface)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
 
+    implementation("com.github.bumptech.glide:glide:4.16.0")
+    kapt("com.github.bumptech.glide:compiler:4.16.0")
+    implementation("com.google.firebase:firebase-appcheck")
+    implementation("com.google.firebase:firebase-appcheck-interop")
+    implementation("com.google.firebase:firebase-appcheck-debug")
+
+
     //Dependencies of OSM
     implementation(libs.osmdroid.android)
+
 }

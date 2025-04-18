@@ -34,7 +34,7 @@
                     app:srcCompat="@drawable/arc_3" />
 
                 <ImageView
-                    android:id="@+id/imageView6"
+                    android:id="@+id/imageViewProfile"
                     android:layout_width="111dp"
                     android:layout_height="109dp"
                     app:layout_constraintBottom_toTopOf="@+id/imageView4"

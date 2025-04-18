@@ -1,13 +1,16 @@
 package com.example.app
 
+import android.app.Activity
 import android.app.AlertDialog
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import com.bumptech.glide.Glide
 import com.example.app.databinding.FragmentProfileBinding
 import com.google.firebase.auth.FirebaseAuth
 import com.google.android.material.snackbar.Snackbar
@@ -16,6 +19,7 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
+import com.google.firebase.database.*
 
 class ProfileFragment : Fragment() {
 
@@ -33,6 +37,8 @@ class ProfileFragment : Fragment() {
     private lateinit var database: FirebaseDatabase
     private lateinit var usersRef: DatabaseReference // Référence spécifique à "users"
 
+    private val PICK_IMAGE_REQUEST = 1
+    private var selectedImageUri: Uri? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -91,6 +97,17 @@ class ProfileFragment : Fragment() {
         currentUserUid?.let { user ->
             val uid = user.uid // Récupère l'UID
 
+            //  Chargement de la photo de profil
+            usersRef.child(uid).child("profilePhotoUrl").get()
+                .addOnSuccessListener { snapshot ->
+                    val url = snapshot.value?.toString()
+                    if (!url.isNullOrEmpty()) {
+                        Glide.with(requireContext())
+                            .load(url)
+                            .into(binding.imageViewProfile)
+                    }
+                }
+
             // Écoute les données de l'utilisateur spécifique
             usersRef.child(uid).addValueEventListener(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
@@ -108,7 +125,42 @@ class ProfileFragment : Fragment() {
             })
         }
 
+        // Clic pour choisir une nouvelle photo
+        binding.imageViewProfile.setOnClickListener {
+            val intent = Intent(Intent.ACTION_PICK)
+            intent.type = "image/*"
+            startActivityForResult(intent, PICK_IMAGE_REQUEST)
+        }
 
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (requestCode == PICK_IMAGE_REQUEST && resultCode == Activity.RESULT_OK && data?.data != null) {
+            selectedImageUri = data.data
+
+            selectedImageUri?.let { uri ->
+                FirebaseStorageHelper.uploadProfilePhoto(
+                    imageUri = uri,
+                    onSuccess = { downloadUrl ->
+                        Glide.with(requireContext())
+                            .load(downloadUrl)
+                            .into(binding.imageViewProfile)
+                        Toast.makeText(requireContext(), "Photo mise à jour !", Toast.LENGTH_SHORT).show()
+
+                        // Mise à jour dans Realtime Database aussi (optionnel, si nécessaire)
+                        val uid = FirebaseAuth.getInstance().currentUser?.uid
+                        uid?.let {
+                            usersRef.child(it).child("profilePhotoUrl").setValue(downloadUrl)
+                        }
+                    },
+                    onFailure = {
+                        Toast.makeText(requireContext(), "Erreur : ${it.message}", Toast.LENGTH_SHORT).show()
+                    }
+                )
+            }
+        }
     }
 
     private fun animation(it : View) {
