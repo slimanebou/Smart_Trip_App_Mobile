@@ -10,6 +10,7 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
+import android.widget.ImageView
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
@@ -36,9 +37,12 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 import java.io.File
+import com.bumptech.glide.Glide
 
 
 class HomeFragment : Fragment() {
+
+    private lateinit var imageViewProfileHome: ImageView
 
     // Déclaration un variable mutable binding pour FragmentProfileBinding pour gerer les cycles de vie
     // _ c'est une convention Kotlin pour indique la version brute (comme * en rust)
@@ -120,6 +124,8 @@ class HomeFragment : Fragment() {
 
 
         // Initialisation
+        imageViewProfileHome = view.findViewById(R.id.imageViewProfileHome)
+
         mapView = view.findViewById(R.id.mapView)
         gpsDeniedMessage = view.findViewById(R.id.gpsDeniedMessage)
         blurOverlay = view.findViewById(R.id.blurOverlay)
@@ -170,6 +176,21 @@ class HomeFragment : Fragment() {
         // ?.let{} S'exécute SEULEMENT si currentUserUid n'est pas null
         currentUserUid?.let { user ->
             val uid = user.uid // Récupère l'UID
+
+            usersRef.child(uid).child("profilePhotoUrl").get()
+                .addOnSuccessListener { snapshot ->
+                    val url = snapshot.value?.toString()
+                    if (!url.isNullOrEmpty()) {
+                        Glide.with(requireContext())
+                            .load(url)
+                            .placeholder(R.drawable.user_1)
+                            .into(imageViewProfileHome)
+                    }
+                }
+                .addOnFailureListener {
+                    Toast.makeText(requireContext(), "Impossible de charger la photo de profil", Toast.LENGTH_SHORT).show()
+                }
+
 
             // Écoute les données de l'utilisateur spécifique
             usersRef.child(uid).addValueEventListener(object : ValueEventListener {
