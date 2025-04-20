@@ -21,7 +21,7 @@ object JourneyManager {
         Toast.makeText(context, "Voyage démarré !", Toast.LENGTH_SHORT).show()
 
         val formatter = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-        val dateFormatted = formatter.format(Date(date.toEpochDay() * 86400000))
+        val dateFormatted = formatter.format(date)
 
         currentItinerary = Itinerary(
             name = name,
