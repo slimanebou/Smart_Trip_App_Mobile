@@ -10,13 +10,14 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.core.content.FileProvider
 import androidx.exifinterface.media.ExifInterface
 import com.example.app.managers.JourneyManager
-import com.example.app.models.PhotoModel
 import org.osmdroid.util.GeoPoint
 import java.io.File
 import java.io.InputStream
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import com.example.app.models.PhotoModel
+
 
 class PhotoHelper(private val context: Context) {
 

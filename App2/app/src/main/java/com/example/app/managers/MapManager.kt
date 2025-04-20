@@ -12,13 +12,12 @@ import androidx.annotation.DrawableRes
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
 import com.example.app.R
-import com.example.app.models.PhotoModel
 import org.osmdroid.util.BoundingBox
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.Polyline
-import com.example.app.models.itinerary
+import com.example.app.models.Itinerary
 
 object MapManager {
 
@@ -32,7 +31,7 @@ object MapManager {
         mapView.invalidate()
     }
 
-    fun drawItinerary(itinerary: itinerary, mapView: MapView) {
+    fun drawItinerary(itinerary: Itinerary, mapView: MapView) {
         if (itinerary.it_points.size < 2) return // pas assez de points pour dessiner
 
         mapView.overlays.clear()  // Supprime tous les anciens marqueurs (y compris "Vous êtes ici")
@@ -79,12 +78,11 @@ object MapManager {
                     title = "Photo"
                     setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
                     icon = resizeIcon(mapView.context, R.drawable.ic_photo_marker, 48, 48)
-                    setOnMarkerClickListener { marker, _ ->
-                        photo.uri?.let { uri ->
-                            showPhotoDialog(mapView.context, uri)
-                        }
+                    setOnMarkerClickListener { _, _ ->
+                        showPhotoDialog(mapView.context, photo.uri, photo.urlFirebase)
                         true
                     }
+
                 }
                 mapView.overlays.add(photoMarker)
             }
@@ -101,19 +99,40 @@ object MapManager {
     }
 
 
-    private fun showPhotoDialog(context: Context, photoUri: Uri) {
+    private fun showPhotoDialog(context: Context, photoUri: Uri?, url: String?) {
         val imageView = ImageView(context).apply {
-            setImageURI(photoUri)
             adjustViewBounds = true
             scaleType = ImageView.ScaleType.FIT_CENTER
         }
 
-        AlertDialog.Builder(context)
+        val dialog = AlertDialog.Builder(context)
             .setView(imageView)
-            .setPositiveButton("Fermer") { dialog, _ -> dialog.dismiss() }
+            .setPositiveButton("Fermer") { d, _ -> d.dismiss() }
             .create()
-            .show()
+
+        if (photoUri != null && photoUri != Uri.EMPTY) {
+            imageView.setImageURI(photoUri)
+            dialog.show()
+        } else if (!url.isNullOrEmpty()) {
+            Thread {
+                try {
+                    val input = java.net.URL(url).openStream()
+                    val bitmap = BitmapFactory.decodeStream(input)
+                    (context as? android.app.Activity)?.runOnUiThread {
+                        imageView.setImageBitmap(bitmap)
+                        dialog.show()
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }.start()
+        } else {
+            // fallback
+            imageView.setImageResource(R.drawable.ic_photo_marker)
+            dialog.show()
+        }
     }
+
 
     private fun resizeIcon(context: Context, @DrawableRes resId: Int, widthDp: Int, heightDp: Int): BitmapDrawable? {
         val drawable = ContextCompat.getDrawable(context, resId) ?: return null

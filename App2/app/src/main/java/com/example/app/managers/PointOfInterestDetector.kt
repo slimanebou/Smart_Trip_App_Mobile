@@ -2,14 +2,14 @@ package com.example.app.managers
 
 import com.example.app.helpers.GeoHelper
 import com.example.app.models.PointOfInterest
-import com.example.app.models.itinerary
+import com.example.app.models.Itinerary
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.osmdroid.util.GeoPoint
 
 class PointOfInterestDetector(
-    private val itinerary: itinerary,
+    private val itinerary: Itinerary,
     private val detectionRadiusMeters: Double = 100.0,  // Rayon de détection
     private val stayDurationMillis: Long = 2 * 60 * 1000  // Temps d'arrêt minimum (30 minutes par défaut)
 ) {
@@ -49,7 +49,8 @@ class PointOfInterestDetector(
             // 🔥 Ici, remplace ton User-Agent manuellement :
             val name = placeName ?: "Point d'intérêt inconnu"
 
-            itinerary.ajouterPointInteret(PointOfInterest(location, name))
+            itinerary.ajouterPointInteret(PointOfInterest(name, location = location))
+
         }
     }
 }
