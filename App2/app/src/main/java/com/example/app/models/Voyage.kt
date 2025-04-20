@@ -13,8 +13,8 @@ data class Voyage(
     val nom: String = "",
     val description: String = "",
     val villeDepart: String = "",
-    val dateDebut: Long = 0L, // Epoch day
-    val dateFin: Long = 0L,   // Epoch day
+    val dateDebut: String = "",
+    val dateFin: String = "",
     val points: List<FirestoreGeoPoint> = emptyList(),
     val photos: List<PhotoMeta> = emptyList()
 ) : Serializable
@@ -22,8 +22,17 @@ data class Voyage(
 fun Voyage.toItinerary(): Itinerary {
     val formatter = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
 
-    val dateDebutFormatted = formatter.format(Date(dateDebut * 86400000)) // 86400000ms = 1 day
-    val dateFinFormatted = formatter.format(Date(dateFin * 86400000))
+    val dateDebutFormatted = try {
+        formatter.format(formatter.parse(dateDebut) ?: Date())
+    } catch (e: Exception) {
+        "?"
+    }
+
+    val dateFinFormatted = try {
+        formatter.format(formatter.parse(dateFin) ?: Date())
+    } catch (e: Exception) {
+        "?"
+    }
 
     return Itinerary(
         name = nom,
@@ -41,3 +50,4 @@ fun Voyage.toItinerary(): Itinerary {
         }.toMutableList()
     )
 }
+

@@ -1,31 +1,59 @@
 package com.example.app.managers
 
-import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
-import androidx.fragment.app.FragmentActivity
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.example.app.R
-import com.example.app.VoyageDetailsFragment
 import com.example.app.models.Voyage
-import java.io.Serializable
-
+import java.text.SimpleDateFormat
+import java.util.*
 
 class VoyageAdapter(
     private val voyages: List<Voyage>,
-    private val onVoyageClick: (Voyage) -> Unit
+    private val onItemClick: (Voyage) -> Unit,
+    private val onImageClick: (Voyage) -> Unit
 ) : RecyclerView.Adapter<VoyageAdapter.VoyageViewHolder>() {
 
     inner class VoyageViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        private val textNomVoyage: TextView = itemView.findViewById(R.id.textNomVoyage)
+        val imageVoyage: ImageView = itemView.findViewById(R.id.imageVoyage)
+        val titleText: TextView = itemView.findViewById(R.id.textTitle)
+        val descText: TextView = itemView.findViewById(R.id.textDescription)
+        val datesText: TextView = itemView.findViewById(R.id.textDate)
 
         fun bind(voyage: Voyage) {
-            textNomVoyage.text = voyage.nom
-            itemView.setOnClickListener {
-                onVoyageClick(voyage) // 👉 seulement ça
+            titleText.text = voyage.nom
+            descText.text = voyage.description
+
+            val formattedDates = itemView.context.getString(
+                R.string.trip_dates,
+                formatDateString(voyage.dateDebut),
+                formatDateString(voyage.dateFin)
+            )
+
+            datesText.text = formattedDates
+
+            if (!voyage.photos.isNullOrEmpty()) {
+                val imageUrl = voyage.photos.first().url
+                Glide.with(itemView.context)
+                    .load(imageUrl)
+                    .placeholder(R.drawable.image_placeholder)
+                    .into(imageVoyage)
+            } else {
+                imageVoyage.setImageResource(R.drawable.image_placeholder)
             }
+
+            itemView.setOnClickListener {
+                onItemClick(voyage)
+            }
+
+            imageVoyage.setOnClickListener {
+                onImageClick(voyage)
+            }
+
         }
     }
 
@@ -40,4 +68,17 @@ class VoyageAdapter(
     }
 
     override fun getItemCount(): Int = voyages.size
+
+    private fun formatDateString(dateStr: String?): String {
+        if (dateStr.isNullOrBlank()) return "?"
+        return try {
+            val parser = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+            val formatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+            val date = parser.parse(dateStr)
+            formatter.format(date!!)
+        } catch (e: Exception) {
+            "?"
+        }
+    }
+
 }

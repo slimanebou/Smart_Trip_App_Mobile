@@ -11,6 +11,8 @@ import com.example.app.managers.VoyageAdapter
 import com.example.app.models.Voyage
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import android.widget.Toast
+
 
 class MyTripsFragment : Fragment() {
 
@@ -27,18 +29,26 @@ class MyTripsFragment : Fragment() {
         recyclerView = view.findViewById(R.id.recyclerViewVoyages)
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
 
-        adapter = VoyageAdapter(voyages) { voyage ->
-            val fragment = VoyageDetailsFragment().apply {
-                arguments = Bundle().apply {
-                    putSerializable("voyage", voyage)
+        adapter = VoyageAdapter(voyages,
+            onItemClick = { voyage ->
+                // Quand on clique sur la carte entière
+                val fragment = VoyageDetailsFragment().apply {
+                    arguments = Bundle().apply {
+                        putSerializable("voyage", voyage)
+                    }
                 }
-            }
 
-            parentFragmentManager.beginTransaction()
-                .replace(R.id.frame_layout, fragment)
-                .addToBackStack(null)
-                .commit()
-        }
+                parentFragmentManager.beginTransaction()
+                    .replace(R.id.frame_layout, fragment)
+                    .addToBackStack(null)
+                    .commit()
+            },
+            onImageClick = { voyage ->
+                // 👉 Ouvre un sélecteur d’image ici
+                Toast.makeText(requireContext(), "Changer l'image pour ${voyage.nom}", Toast.LENGTH_SHORT).show()
+                // Tu peux ici démarrer une Activity pour sélectionner une image (ACTION_PICK)
+            }
+        )
 
         recyclerView.adapter = adapter
         loadVoyagesFromFirestore()

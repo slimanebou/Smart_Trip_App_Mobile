@@ -97,13 +97,9 @@ object JourneyManager {
     ) {
         val formatter = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
 
-        val dateDebutLong = itinerary.date_debut?.let {
-            formatter.parse(it)?.time?.div(86400000)
-        } ?: 0L
+        val dateDebutLong = itinerary.date_debut ?: ""
+        val dateFinLong = itinerary.date_fin ?: ""
 
-        val dateFinLong = itinerary.date_fin?.let {
-            formatter.parse(it)?.time?.div(86400000)
-        } ?: 0L
 
         val voyage = Voyage(
             id = voyageId,
