@@ -27,6 +27,8 @@ class ProfileFragment : Fragment() {
     // _ c'est une convention Kotlin pour indique la version brute (comme * en rust)
     private var _binding: FragmentProfileBinding? = null
 
+    private var valueListener: ValueEventListener? = null
+
     // Déclaration une variable immutable (propriété en lecture seule) binding pour FragmentProfileBinding pour gerer les cycles de vie
     private val binding get() = _binding!!
 
@@ -76,6 +78,11 @@ class ProfileFragment : Fragment() {
         // Détection du clic sur le bouton de update profil
         binding.settingsLayout.setOnClickListener {
             animation(it)
+
+            parentFragmentManager.beginTransaction()
+                .replace(R.id.frame_layout, EditProfileFragment())
+                .addToBackStack(null)
+                .commit()
         }
 
         // Détection du clic sur le bouton de déconnexion
@@ -112,24 +119,28 @@ class ProfileFragment : Fragment() {
                     }
                 }
 
-            // Écoute les données de l'utilisateur spécifique
-            usersRef.child(uid).addValueEventListener(object : ValueEventListener {
+
+            valueListener = object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
-                    // Récupération directe du champ
+                    if (!isAdded || view == null || _binding == null) return
+
                     val firstName = snapshot.child("firstName").value?.toString()
                     val lastName = snapshot.child("lastName").value?.toString()
-                    val  email= snapshot.child("email").value?.toString()
+                    val email = snapshot.child("email").value?.toString()
                     binding.textView6.text = "$firstName $lastName"
                     binding.textView7.text = email
                 }
 
-                override fun onCancelled(error: DatabaseError) {
+                override fun onCancelled(error: DatabaseError) {}
+            }
 
-                }
-            })
+            usersRef.child(uid).addValueEventListener(valueListener!!)
+
+
         }
 
-        // Clic pour choisir une nouvelle photo
+
+            // Clic pour choisir une nouvelle photo
         binding.imageViewProfile.setOnClickListener {
             val intent = Intent(Intent.ACTION_PICK)
             intent.type = "image/*"
@@ -218,10 +229,12 @@ class ProfileFragment : Fragment() {
     // pour éviter les fuites de mémoire (backing property pattern)
     override fun onDestroyView() {
         super.onDestroyView()
-        // Clear the binding reference to prevent memory leaks
-        // as the Fragment's view hierarchy is destroyed
+        valueListener?.let {
+            usersRef.removeEventListener(it)
+        }
         _binding = null
     }
+
 
 
 
