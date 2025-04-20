@@ -56,8 +56,12 @@ class ProfileFragment : Fragment() {
         // Détection du clic sur le bouton de my trips
         binding.myTripsLayout.setOnClickListener {
             animation(it)
-        }
 
+            parentFragmentManager.beginTransaction()
+                .replace(R.id.frame_layout, MyTripsFragment())
+                .addToBackStack(null)
+                .commit()
+        }
         // Détection du clic sur le bouton de langue
         binding.languageLayout.setOnClickListener {
             animation(it)

@@ -1,25 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
-    android:background="@color/dark_blue"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/dark_blue"
     android:padding="16dp">
 
     <TextView
-        android:id="@+id/titleText"
+        android:id="@+id/journeyTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Journey"
-        android:textColor="@android:color/white"
         android:textSize="24sp"
+        android:textColor="@android:color/white"
         android:layout_gravity="center_horizontal"
-        android:padding="8dp" />
+        android:paddingTop="32dp"
+        android:paddingBottom="16dp"
+        android:textStyle="bold" />
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerViewVoyages"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:paddingTop="16dp"
-        android:clipToPadding="false"/>
+
+
 </LinearLayout>
