@@ -36,8 +36,9 @@ class VoyageAdapter(
 
             datesText.text = formattedDates
 
-            if (!voyage.photos.isNullOrEmpty()) {
-                val imageUrl = voyage.photos.first().url
+            val imageUrl = voyage.coverPhotoUrl ?: voyage.photos.firstOrNull()?.url
+
+            if (imageUrl != null) {
                 Glide.with(itemView.context)
                     .load(imageUrl)
                     .placeholder(R.drawable.image_placeholder)

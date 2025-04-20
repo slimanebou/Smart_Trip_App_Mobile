@@ -12,6 +12,7 @@ import com.example.app.models.Voyage
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 
 
 class MyTripsFragment : Fragment() {
@@ -46,7 +47,24 @@ class MyTripsFragment : Fragment() {
             onImageClick = { voyage ->
                 // 👉 Ouvre un sélecteur d’image ici
                 Toast.makeText(requireContext(), "Changer l'image pour ${voyage.nom}", Toast.LENGTH_SHORT).show()
-                // Tu peux ici démarrer une Activity pour sélectionner une image (ACTION_PICK)
+                val photoUrls = voyage.photos.map { it.url }
+
+                AlertDialog.Builder(requireContext())
+                    .setTitle("Choisir une image de couverture")
+                    .setItems(photoUrls.mapIndexed { i, url -> "Photo ${i + 1}" }.toTypedArray()) { _, index ->
+                        val chosenUrl = photoUrls[index]
+                        val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return@setItems
+                        FirebaseFirestore.getInstance()
+                            .collection("Utilisateurs").document(userId)
+                            .collection("voyages").document(voyage.id)
+                            .update("coverPhotoUrl", chosenUrl)
+                            .addOnSuccessListener {
+                                Toast.makeText(requireContext(), "Image de couverture mise à jour", Toast.LENGTH_SHORT).show()
+                            }
+                    }
+                    .setNegativeButton("Annuler", null)
+                    .show()
+
             }
         )
 

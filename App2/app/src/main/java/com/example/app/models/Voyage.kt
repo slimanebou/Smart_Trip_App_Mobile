@@ -13,7 +13,8 @@ data class Voyage(
     val dateDebut: String = "",
     val dateFin: String = "",
     val points: List<FirestoreGeoPoint> = emptyList(),
-    val photos: List<PhotoMeta> = emptyList()
+    val photos: List<PhotoMeta> = emptyList(),
+    val coverPhotoUrl: String? = null
 ) : Serializable
 
 fun Voyage.toItinerary(): Itinerary {
