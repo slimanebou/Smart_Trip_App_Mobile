@@ -5,6 +5,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.app.R
@@ -33,11 +34,9 @@ class VoyageAdapter(
                 formatDateString(voyage.dateDebut),
                 formatDateString(voyage.dateFin)
             )
-
             datesText.text = formattedDates
 
             val imageUrl = voyage.coverPhotoUrl ?: voyage.photos.firstOrNull()?.url
-
             if (imageUrl != null) {
                 Glide.with(itemView.context)
                     .load(imageUrl)
@@ -47,14 +46,23 @@ class VoyageAdapter(
                 imageVoyage.setImageResource(R.drawable.image_placeholder)
             }
 
-            itemView.setOnClickListener {
-                onItemClick(voyage)
-            }
-
+            // ✅ Nouvelle logique
             imageVoyage.setOnClickListener {
-                onImageClick(voyage)
+                onItemClick(voyage) // Ouvre les détails du voyage
             }
 
+            titleText.setOnClickListener {
+                onImageClick(voyage) // Ouvre la sélection d’image
+            }
+
+            // Style du titre → pour indiquer que c’est cliquable
+            titleText.apply {
+                setTextColor(ContextCompat.getColor(context, R.color.purple_500))
+                paint.isUnderlineText = true
+            }
+
+            // Désactiver clic sur la carte complète
+            itemView.setOnClickListener(null)
         }
     }
 
@@ -74,12 +82,11 @@ class VoyageAdapter(
         if (dateStr.isNullOrBlank()) return "?"
         return try {
             val parser = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-            val formatter = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault())
+            val formatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
             val date = parser.parse(dateStr)
             formatter.format(date!!)
         } catch (e: Exception) {
             "?"
         }
     }
-
 }

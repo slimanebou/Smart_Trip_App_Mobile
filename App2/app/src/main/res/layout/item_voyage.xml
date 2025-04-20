@@ -2,65 +2,74 @@
 <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:card_view="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="160dp"
-    android:layout_margin="8dp"
-    card_view:cardCornerRadius="12dp"
-    card_view:cardElevation="4dp">
+    android:layout_height="600dp"
+    android:layout_margin="16dp"
+    card_view:cardCornerRadius="20dp"
+    card_view:cardElevation="8dp"
+    android:layout_weight="0.75">
 
-    <LinearLayout
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="horizontal"
-        android:padding="8dp">
+        android:layout_height="match_parent">
 
-        <!-- Image à gauche -->
+        <!-- Image de fond -->
         <ImageView
             android:id="@+id/imageVoyage"
-            android:layout_width="120dp"
+            android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:scaleType="centerCrop"
-            android:src="@drawable/image_placeholder"
             android:contentDescription="@string/voyage_image_desc" />
 
-        <!-- Texte à droite -->
-        <LinearLayout
-            android:layout_width="0dp"
+        <!-- Overlay sombre -->
+        <View
+            android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_weight="1"
+            android:background="#66000000" />
+
+        <!-- Texte superposé -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:orientation="vertical"
-            android:paddingStart="12dp"
-            android:gravity="center_vertical">
+            android:padding="20dp"
+            android:gravity="bottom">
+
+            <TextView
+                android:id="@+id/textCity"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="🇫🇷 Paris"
+                android:textColor="@android:color/white"
+                android:textSize="16sp"
+                android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/textTitle"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Nom du voyage"
-                android:textStyle="bold"
-                android:textSize="16sp"
-                android:textColor="@android:color/black"
-                android:maxLines="1"
-                android:ellipsize="end" />
+                android:text="Nom du trip"
+                android:textColor="@android:color/white"
+                android:textSize="24sp"
+                android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/textDescription"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:ellipsize="end"
-                android:maxLines="2"
                 android:text="Courte description ici"
-                android:textColor="@android:color/darker_gray"
-                android:textSize="14sp" />
+                android:textColor="@android:color/white"
+                android:maxLines="2"
+                android:ellipsize="end"
+                android:textSize="16sp" />
 
             <TextView
                 android:id="@+id/textDate"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
                 android:text="Du 01/01/2024 au 02/01/2024"
-                android:textColor="@android:color/holo_blue_dark"
-                android:textSize="13sp" />
+                android:textColor="@android:color/white"
+                android:textSize="14sp"
+                android:layout_marginTop="6dp"/>
         </LinearLayout>
-    </LinearLayout>
+    </FrameLayout>
 </androidx.cardview.widget.CardView>
