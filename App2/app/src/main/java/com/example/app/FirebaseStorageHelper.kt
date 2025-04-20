@@ -60,11 +60,13 @@ object FirebaseStorageHelper {
             .addOnSuccessListener {
                 photoRef.downloadUrl.addOnSuccessListener { downloadUrl ->
                     val firestore = FirebaseFirestore.getInstance()
+                    val formatter = java.text.SimpleDateFormat("dd-MM-yyyy HH:mm", Locale.getDefault())
+                    val formattedDate = formatter.format(Date())
                     val entree = hashMapOf(
                         "type" to "photo",
                         "photo_url" to downloadUrl.toString(),
                         "description" to description,
-                        "timestamp" to Timestamp.now(),
+                        "date" to formattedDate,
                         "position" to GeoPoint(lat, lng)
                     )
 

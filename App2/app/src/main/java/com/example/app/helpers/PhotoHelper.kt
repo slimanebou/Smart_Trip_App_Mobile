@@ -58,10 +58,12 @@ class PhotoHelper(private val context: Context) {
     }
 
     fun onPhotoReady(uri: Uri, location: GeoPoint?) {
-        val photo = PhotoModel(uri, location)
+        val dateString = getExifDateString(uri)
+        val photo = PhotoModel(uri, location, date = dateString)
         JourneyManager.currentItinerary?.it_photos?.add(photo)
         attachPhotoToPoiIfPossible(photo)
     }
+
 
 
 
@@ -102,6 +104,24 @@ class PhotoHelper(private val context: Context) {
             if (nearestPoi != null && photoPosition.distanceToAsDouble(nearestPoi.location) < 100.0) {
                 photo.attachedPoiName = nearestPoi.name
             }
+        }
+    }
+
+    private fun getExifDateString(uri: Uri): String {
+        return try {
+            val inputStream = context.contentResolver.openInputStream(uri) ?: return "?"
+            val exif = ExifInterface(inputStream)
+            val exifDate = exif.getAttribute(ExifInterface.TAG_DATETIME_ORIGINAL)
+                ?: exif.getAttribute(ExifInterface.TAG_DATETIME)
+                ?: return "?"
+
+            val parser = SimpleDateFormat("yyyy:MM:dd HH:mm:ss", Locale.getDefault())
+            val formatter = SimpleDateFormat("dd-MM-yyyy HH:mm", Locale.getDefault())
+            val date = parser.parse(exifDate)
+            formatter.format(date!!)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            "?"
         }
     }
 

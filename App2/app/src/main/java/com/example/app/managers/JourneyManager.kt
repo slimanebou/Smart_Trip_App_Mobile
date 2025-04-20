@@ -2,6 +2,7 @@ package com.example.app.managers
 
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.util.Log
 import android.widget.Toast
 import com.example.app.models.*
@@ -12,6 +13,7 @@ import com.google.firebase.storage.FirebaseStorage
 import org.osmdroid.util.GeoPoint
 import java.text.SimpleDateFormat
 import java.util.*
+import androidx.exifinterface.media.ExifInterface
 
 object JourneyManager {
 
@@ -20,8 +22,7 @@ object JourneyManager {
     fun startJourney(context: Context, ville: String?, date: java.time.LocalDate, name: String?) {
         Toast.makeText(context, "Voyage démarré !", Toast.LENGTH_SHORT).show()
 
-        val formatter = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-        val dateFormatted = formatter.format(date)
+        val dateFormatted = date.toString()
 
         currentItinerary = Itinerary(
             name = name,
@@ -67,7 +68,7 @@ object JourneyManager {
             }.addOnSuccessListener { downloadUri ->
                 val meta = PhotoMeta(
                     url = downloadUri.toString(),
-                    date = System.currentTimeMillis(),
+                    date = getPhotoDateFromExif(context, uri),
                     latitude = photo.position?.latitude ?: 0.0,
                     longitude = photo.position?.longitude ?: 0.0,
                     commentaire = photo.attachedPoiName ?: "",
@@ -125,5 +126,23 @@ object JourneyManager {
                 Toast.makeText(context, "Erreur: ${e.message}", Toast.LENGTH_SHORT).show()
                 Log.e("Firebase", "Erreur: ${e.message}")
             }
+    }
+
+    private fun getPhotoDateFromExif(context: Context, uri: Uri): String {
+        return try {
+            val inputStream = context.contentResolver.openInputStream(uri)
+            val exif = inputStream?.use { ExifInterface(it) }
+            val dateString = exif?.getAttribute(ExifInterface.TAG_DATETIME)
+            val exifFormat = SimpleDateFormat("yyyy:MM:dd HH:mm:ss", Locale.getDefault())
+            val outputFormat = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
+
+            dateString?.let {
+                val parsedDate = exifFormat.parse(it)
+                if (parsedDate != null) outputFormat.format(parsedDate) else outputFormat.format(Date())
+            } ?: outputFormat.format(Date())
+        } catch (e: Exception) {
+            e.printStackTrace()
+            SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()).format(Date())
+        }
     }
 }

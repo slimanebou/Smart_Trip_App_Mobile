@@ -73,7 +73,7 @@ class VoyageAdapter(
         if (dateStr.isNullOrBlank()) return "?"
         return try {
             val parser = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-            val formatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+            val formatter = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault())
             val date = parser.parse(dateStr)
             formatter.format(date!!)
         } catch (e: Exception) {
