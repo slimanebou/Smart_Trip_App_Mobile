@@ -4,22 +4,14 @@
     android:background="@color/dark_blue"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="16dp">
+    android:paddingTop="25dp">
 
-    <TextView
-        android:id="@+id/titleTextMyTrips"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="My Trips"
-        android:textColor="@android:color/white"
-        android:textSize="24sp"
-        android:layout_gravity="center_horizontal"
-        android:padding="8dp" />
+
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerViewVoyages"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:paddingTop="16dp"
+        android:paddingTop="5dp"
         android:clipToPadding="false"/>
 </LinearLayout>

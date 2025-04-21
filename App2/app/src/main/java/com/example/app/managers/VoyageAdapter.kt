@@ -22,12 +22,10 @@ class VoyageAdapter(
     inner class VoyageViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val imageVoyage: ImageView = itemView.findViewById(R.id.imageVoyage)
         val titleText: TextView = itemView.findViewById(R.id.textTitle)
-        val descText: TextView = itemView.findViewById(R.id.textDescription)
         val datesText: TextView = itemView.findViewById(R.id.textDate)
 
         fun bind(voyage: Voyage) {
             titleText.text = voyage.nom
-            descText.text = voyage.description
 
             val formattedDates = itemView.context.getString(
                 R.string.trip_dates,

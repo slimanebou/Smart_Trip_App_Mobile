@@ -7,16 +7,32 @@
     android:padding="16dp">
 
     <TextView
-        android:id="@+id/journeyTitle"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Journey"
-        android:textSize="24sp"
-        android:textColor="@android:color/white"
-        android:layout_gravity="center_horizontal"
-        android:paddingTop="32dp"
-        android:paddingBottom="16dp"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="16dp"
+        android:text="Find a Journey\nHere!"
+        android:textColor="@color/white"
+        android:textSize="30sp"
         android:textStyle="bold" />
+
+    <EditText
+        android:id="@+id/editTextText2"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="32dp"
+        android:layout_marginBottom="16dp"
+        android:background="@drawable/edittext_background"
+        android:drawableStart="@drawable/search"
+        android:drawablePadding="8dp"
+        android:ems="10"
+        android:hint="Search..."
+        android:inputType="text"
+        android:padding="8dp"
+        android:textColor="@color/white"
+        android:textColorHint="@color/white" />
 
 
 
