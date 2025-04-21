@@ -1,10 +1,14 @@
 package com.example.app.managers
 
+import android.app.AlertDialog
+import android.content.Context
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
@@ -17,12 +21,17 @@ class VoyageAdapter(
     private val voyages: List<Voyage>,
     private val onItemClick: (Voyage) -> Unit,
     private val onImageClick: (Voyage) -> Unit
+
 ) : RecyclerView.Adapter<VoyageAdapter.VoyageViewHolder>() {
 
     inner class VoyageViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val imageVoyage: ImageView = itemView.findViewById(R.id.imageVoyage)
         val titleText: TextView = itemView.findViewById(R.id.textTitle)
         val datesText: TextView = itemView.findViewById(R.id.textDate)
+
+        val favoriteIcon: ImageView = itemView.findViewById(R.id.favoriteIcon)
+
+        private var isFavorite = false
 
         fun bind(voyage: Voyage) {
             titleText.text = voyage.nom
@@ -59,10 +68,22 @@ class VoyageAdapter(
                 paint.isUnderlineText = true
             }
 
-            // Désactiver clic sur la carte complète
-            itemView.setOnClickListener(null)
+//            // Désactiver clic sur la carte complète
+//            itemView.setOnClickListener(null)
+
+            // gestion de l'icone favorite
+            favoriteIcon.setImageResource(R.drawable.favorite_white) // par défaut
+            favoriteIcon.setOnClickListener {
+                isFavorite = !isFavorite
+                val newIcon = if (isFavorite) R.drawable.favorite else R.drawable.favorite_white
+                favoriteIcon.setImageResource(newIcon)
+            }
+
         }
     }
+
+
+
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VoyageViewHolder {
         val view = LayoutInflater.from(parent.context)

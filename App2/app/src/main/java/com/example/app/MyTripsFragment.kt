@@ -72,6 +72,9 @@ class MyTripsFragment : Fragment() {
         loadVoyagesFromFirestore()
 
         return view
+
+
+
     }
 
     private fun loadVoyagesFromFirestore() {
