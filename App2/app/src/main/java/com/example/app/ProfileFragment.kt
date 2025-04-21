@@ -1,6 +1,5 @@
 package com.example.app
 
-import android.app.Activity
 import android.app.AlertDialog
 import android.content.Intent
 import android.net.Uri
@@ -9,11 +8,9 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import com.bumptech.glide.Glide
 import com.example.app.databinding.FragmentProfileBinding
 import com.google.firebase.auth.FirebaseAuth
-import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
@@ -72,7 +69,17 @@ class ProfileFragment : Fragment() {
         // Détection du clic sur le bouton de my favorite
         binding.myFavoriteLayout.setOnClickListener {
             animation(it)
-            val intent = Intent(requireActivity(), FavoriteFragment::class.java)
+
+            // gestionnaire de fragments
+            parentFragmentManager.beginTransaction()
+                .replace(R.id.frame_layout, FavoriteFragment())
+
+                // gerer le retour au fragment precedent
+                .addToBackStack(null)
+
+                // valider la transaction
+                .commit()
+
         }
 
         // Détection du clic sur le bouton de update profil
@@ -120,6 +127,7 @@ class ProfileFragment : Fragment() {
                 }
 
 
+            // Chargement des données de l'utilisateur
             valueListener = object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     if (!isAdded || view == null || _binding == null) return
@@ -138,45 +146,8 @@ class ProfileFragment : Fragment() {
 
 
         }
-
-
-            // Clic pour choisir une nouvelle photo
-        binding.imageViewProfile.setOnClickListener {
-            val intent = Intent(Intent.ACTION_PICK)
-            intent.type = "image/*"
-            startActivityForResult(intent, PICK_IMAGE_REQUEST)
-        }
-
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-
-        if (requestCode == PICK_IMAGE_REQUEST && resultCode == Activity.RESULT_OK && data?.data != null) {
-            selectedImageUri = data.data
-
-            selectedImageUri?.let { uri ->
-                FirebaseStorageHelper.uploadProfilePhoto(
-                    imageUri = uri,
-                    onSuccess = { downloadUrl ->
-                        Glide.with(requireContext())
-                            .load(downloadUrl)
-                            .into(binding.imageViewProfile)
-                        Toast.makeText(requireContext(), "Photo mise à jour !", Toast.LENGTH_SHORT).show()
-
-                        // Mise à jour dans Realtime Database aussi (optionnel, si nécessaire)
-                        val uid = FirebaseAuth.getInstance().currentUser?.uid
-                        uid?.let {
-                            usersRef.child(it).child("profilePhotoUrl").setValue(downloadUrl)
-                        }
-                    },
-                    onFailure = {
-                        Toast.makeText(requireContext(), "Erreur : ${it.message}", Toast.LENGTH_SHORT).show()
-                    }
-                )
-            }
-        }
-    }
 
     private fun animation(it : View) {
         it.animate()
@@ -234,9 +205,6 @@ class ProfileFragment : Fragment() {
         }
         _binding = null
     }
-
-
-
 
 
 }
