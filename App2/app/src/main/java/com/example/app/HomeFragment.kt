@@ -179,11 +179,12 @@ class HomeFragment : Fragment() {
 
             usersRef.child(uid).child("profilePhotoUrl").get()
                 .addOnSuccessListener { snapshot ->
+                    if (!isAdded || context == null || view == null || _binding == null) return@addOnSuccessListener
+
                     val url = snapshot.value?.toString()
                     if (!url.isNullOrEmpty()) {
                         Glide.with(requireContext())
                             .load(url)
-                            .placeholder(R.drawable.user_1)
                             .into(imageViewProfileHome)
                     }
                 }
