@@ -1,20 +1,57 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/dark_blue"
-    tools:context=".FavoriteFragment">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:background="@color/dark_blue">
 
-    <!--    TODO: Update blank fragment layout -->
-    <TextView
+    <!-- Barre d'outils en haut avec les 3 points -->
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:paddingTop="40dp"
+        android:paddingBottom="10dp"
+        android:layout_width="match_parent"
+        android:layout_height="90dp"
+        android:background="@color/dark_blue"
+        android:elevation="4dp"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+        app:popupTheme="@style/ThemeOverlay.AppCompat.Light">
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/imageProfileFavorite"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@drawable/user_1"
+            app:civ_border_width="2dp"
+            app:civ_border_color="@color/white"
+            android:layout_marginRight="5dp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Favorite"
+            android:textColor="@android:color/white"
+            android:textSize="25sp"
+            android:textStyle="bold"/>
+
+        <ImageView
+            android:id="@+id/menuFavorite"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:layout_marginEnd="16dp"
+            android:src="@drawable/points"/>
+
+    </androidx.appcompat.widget.Toolbar>
+
+    <!-- RecyclerView pour la liste des élèves -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerViewFavorite"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:gravity="center"
-        android:text="Favorites"
-        android:textSize="36dp"
-        android:textAlignment="center"
-        android:textColor="@color/white">
+        android:paddingBottom="?attr/actionBarSize"
+        android:clipToPadding="false"/>
 
-    </TextView>
-</FrameLayout>
+
+</LinearLayout>

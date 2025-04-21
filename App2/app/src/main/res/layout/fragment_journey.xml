@@ -2,37 +2,77 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
-    android:background="@color/dark_blue"
-    android:padding="16dp">
+    android:background="@color/dark_blue">
 
-    <TextView
+    <!-- Barre d'outils en haut avec les 3 points -->
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:paddingTop="40dp"
+        android:paddingBottom="10dp"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="32dp"
-        android:layout_marginTop="16dp"
-        android:text="Find a Journey\nHere!"
-        android:textColor="@color/white"
-        android:textSize="30sp"
-        android:textStyle="bold" />
+        android:layout_height="90dp"
+        android:background="@color/dark_blue"
+        android:elevation="4dp"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+        app:popupTheme="@style/ThemeOverlay.AppCompat.Light">
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/imageProfileJourney"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@drawable/user_1"
+            app:civ_border_width="2dp"
+            app:civ_border_color="@color/white"
+            android:layout_marginRight="5dp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Journey"
+            android:textColor="@android:color/white"
+            android:textSize="25sp"
+            android:textStyle="bold"/>
+
+        <ImageView
+            android:id="@+id/menuJourney"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:layout_marginEnd="16dp"
+            android:src="@drawable/points"/>
+
+    </androidx.appcompat.widget.Toolbar>
+
 
     <EditText
-        android:id="@+id/editTextText2"
+        android:id="@+id/editTextJourney"
         android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:layout_marginStart="32dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="32dp"
-        android:layout_marginBottom="16dp"
+        android:layout_height="40dp"
+        android:layout_margin="16dp"
         android:background="@drawable/edittext_background"
         android:drawableStart="@drawable/search"
         android:drawablePadding="8dp"
         android:ems="10"
-        android:hint="Search..."
+        android:hint="Search for a journey"
         android:inputType="text"
         android:padding="8dp"
         android:textColor="@color/white"
         android:textColorHint="@color/white" />
+
+
+
+
+    <!-- RecyclerView pour la liste des élèves -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerViewJourney"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:paddingBottom="?attr/actionBarSize"
+        android:clipToPadding="false"/>
+
+
 
 
 

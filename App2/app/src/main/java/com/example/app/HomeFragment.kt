@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -193,7 +194,7 @@ class HomeFragment : Fragment() {
                 }
 
 
-            // Écoute les données de l'utilisateur spécifique
+            // recuperer et afficher les données d'utilisateur spécifique
             usersRef.child(uid).addValueEventListener(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     // Récupération directe du champ
@@ -202,7 +203,8 @@ class HomeFragment : Fragment() {
                 }
 
                 override fun onCancelled(error: DatabaseError) {
-
+                    // Gestion des erreurs
+                    Log.e("Firebase", "Erreur de lecture des données : ${error.message}")
                 }
             })
         }
