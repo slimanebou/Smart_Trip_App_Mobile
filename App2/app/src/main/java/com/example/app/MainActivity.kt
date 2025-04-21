@@ -2,6 +2,7 @@ package com.example.app
 
 import android.os.Build
 import android.os.Bundle
+import android.widget.CheckBox
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
@@ -20,6 +21,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     companion object{ var recording = MutableLiveData(false) }
     private lateinit var fab : FloatingActionButton
+    private var isPublicTrip = false
+
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -50,22 +53,29 @@ class MainActivity : AppCompatActivity() {
                 if (!recording.value!!) {
                     if (PermissionHelper.isGpsEnabled(this)) {
                         showStartJourneyDialog()
-                    }
-                    else {
-                        Toast.makeText(this,"Veuillez activer votre localisation GPS.",
-                            Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(
+                            this, "Veuillez activer votre localisation GPS.",
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
                 } else {
                     showStopJourneyConfirmation()
                 }
-            }
-            else {
-                Toast.makeText(this, "Veuillez accorder les permission" +
-                        " la localisation et activer le gps.", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(
+                    this, "Veuillez accorder les permission" +
+                            " la localisation et activer le gps.", Toast.LENGTH_SHORT
+                ).show()
                 PermissionHelper.requestLocationPermission(this)
-                }
             }
         }
+
+
+    }
+
+
+
 
 
     private fun replaceFragment(fragment: Fragment, selectNavItemId: Int? = null) {
@@ -84,6 +94,10 @@ class MainActivity : AppCompatActivity() {
     @RequiresApi(Build.VERSION_CODES.O)
     fun showStartJourneyDialog() {
         val dialogView = layoutInflater.inflate(R.layout.dialog_start_journey, null)
+
+        // Récupérer l'état de la CheckBox
+        isPublicTrip = dialogView.findViewById<CheckBox>(R.id.trajetPublicCheckBox).isChecked
+
 
         val builder = AlertDialog.Builder(this)
         builder.setView(dialogView)
@@ -106,6 +120,7 @@ class MainActivity : AppCompatActivity() {
 
     @RequiresApi(Build.VERSION_CODES.O)
     private fun navigateToHomeAndStartJourney(nom: String, ville: String) {
+
         val homeFragment = HomeFragment()
         recording.value = true
         //  Passer les données au fragment
