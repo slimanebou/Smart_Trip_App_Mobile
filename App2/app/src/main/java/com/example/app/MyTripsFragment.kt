@@ -43,6 +43,7 @@ class MyTripsFragment : Fragment() {
     private val voyages = mutableListOf<Voyage>()
 
 
+    // function
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
