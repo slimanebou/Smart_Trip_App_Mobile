@@ -2,8 +2,8 @@
     <string name="app_name">SmartTrips</string>
     <string name="cadna">cadna</string>
     <string name="default_web_client_id">906269051389-f20dul7rqk3o5sb3ooe6cfur8l0h59eo.apps.googleusercontent.com</string>
-    <string name="ville_de_depart">Ville de départ</string>
-    <string name="nom_du_trajet">Nom du trajet</string>
+    <string name="ville_de_depart">Departure city</string>
+    <string name="nom_du_trajet">Strip Name </string>
     <string name="trip_dates">Du %1$s au %2$s</string>
     <string name="voyage_image_desc">Image du voyage</string>
     <!-- TODO: Remove or change this placeholder text -->

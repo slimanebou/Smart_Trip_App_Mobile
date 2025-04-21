@@ -77,7 +77,8 @@ dependencies {
     implementation("com.google.firebase:firebase-appcheck-interop")
     implementation("com.google.firebase:firebase-appcheck-debug")
 
-
+    // Dependencies of CircleImageView
+    implementation(libs.circleimageview)
 
     //Dependencies of OSM
     implementation(libs.osmdroid.android)

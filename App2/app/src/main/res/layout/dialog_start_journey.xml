@@ -7,8 +7,8 @@
 
     <EditText
         android:id="@+id/nomTrajetInput"
-        android:autofillHints="Mon Premier Voyage"
-        android:hint="@string/nom_du_trajet"
+        android:autofillHints="My First Trip"
+        android:hint="Trip name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:inputType="textPersonName" />
@@ -16,10 +16,23 @@
     <EditText
         android:id="@+id/villeDepartInput"
         android:autofillHints="Paris"
-        android:hint="@string/ville_de_depart"
+        android:hint="Departure city"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:inputType="textPersonName"
         android:layout_marginTop="16dp" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp">
+
+        <CheckBox
+            android:id="@+id/trajetPublicCheckBox"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Public trip"
+            android:layout_alignParentEnd="true"/>
+    </RelativeLayout>
 
 </LinearLayout>

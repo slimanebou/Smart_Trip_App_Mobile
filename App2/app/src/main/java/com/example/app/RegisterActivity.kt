@@ -99,7 +99,7 @@ class RegisterActivity : AppCompatActivity() {
             val pass = binding.inputPasswordR.text.toString()
             val confirmpass = binding.inputConfirmpasswordR.text.toString()
 
-            if (email.isNotEmpty() && pass.isNotEmpty() && confirmpass.isNotEmpty()) {
+            if (email.isNotEmpty() && pass.isNotEmpty() && confirmpass.isNotEmpty() && firstName.isNotEmpty() && lastName.isNotEmpty()) {
                 if (pass == confirmpass) {
                     fireAuth.createUserWithEmailAndPassword(email, pass)
                         .addOnCompleteListener { authTask ->
