@@ -147,32 +147,26 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun saveUserIfNotExists(uid: String, firstName: String, lastName: String, email: String) {
-        val databaseRef = FirebaseDatabase.getInstance().getReference("users").child(uid)
-        val firestoreRef = FirebaseFirestore.getInstance().collection("users").document(uid)
+        val firestoreRef = FirebaseFirestore.getInstance().collection("Utilisateurs").document(uid)
 
-        // Toujours écrire dans Firestore
-        val firestoreUser = mapOf(
-            "name" to "$firstName $lastName",
+        val userMap = mapOf(
+            "firstName" to firstName,
+            "lastName" to lastName,
             "email" to email,
-            "profilePicture" to null,
+            "profilePhotoUrl" to null,
             "settings" to mapOf(
                 "batterySaver" to true,
                 "gpsInterval" to 5
             )
         )
-        firestoreRef.set(firestoreUser)
-            .addOnSuccessListener { Log.d(TAG, "✅ Utilisateur sauvegardé dans Firestore") }
-            .addOnFailureListener { Log.e(TAG, "❌ Échec sauvegarde Firestore", it) }
 
-        // Et en option, aussi dans Realtime DB
-        val userMap = mapOf(
-            "firstName" to firstName,
-            "lastName" to lastName,
-            "email" to email
-        )
-        databaseRef.setValue(userMap)
-            .addOnSuccessListener { Log.d(TAG, "✅ Utilisateur sauvegardé dans Realtime DB") }
-            .addOnFailureListener { Log.e(TAG, "❌ Échec sauvegarde Realtime DB", it) }
+        firestoreRef.get().addOnSuccessListener { doc ->
+            if (!doc.exists()) {
+                firestoreRef.set(userMap)
+                    .addOnSuccessListener { Log.d(TAG, "✅ Utilisateur sauvegardé dans Firestore") }
+                    .addOnFailureListener { Log.e(TAG, "❌ Échec Firestore", it) }
+            }
+        }
     }
 
 

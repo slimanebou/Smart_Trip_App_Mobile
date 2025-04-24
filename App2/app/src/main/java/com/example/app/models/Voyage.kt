@@ -3,18 +3,25 @@ package com.example.app.models
 import com.google.firebase.firestore.GeoPoint as FirestoreGeoPoint
 import org.osmdroid.util.GeoPoint as OsmGeoPoint
 import android.net.Uri
+
 import java.io.Serializable
 
+
 data class Voyage(
-    val id: String = "",
-    val nom: String = "",
-    val description: String = "",
-    val villeDepart: String = "",
-    val dateDebut: String = "",
-    val dateFin: String = "",
-    val points: List<FirestoreGeoPoint> = emptyList(),
-    val photos: List<PhotoMeta> = emptyList(),
-    val coverPhotoUrl: String? = null
+    var id: String = "",
+    var nom: String = "",
+    var description: String = "",
+    var villeDepart: String = "",
+    var dateDebut: String = "",
+    var dateFin: String = "",
+    var isPublic: Boolean = false,
+    var points: List<FirestoreGeoPoint> = emptyList(),
+    var photos: List<PhotoMeta> = emptyList(),
+    var coverPhotoUrl: String? = null,
+    var utilisateur: String = "",
+    var ownerFirstName: String? = null,
+    var ownerLastName: String? = null,
+    var ownerPhotoUrl: String? = null
 ) : Serializable
 
 fun Voyage.toItinerary(): Itinerary {

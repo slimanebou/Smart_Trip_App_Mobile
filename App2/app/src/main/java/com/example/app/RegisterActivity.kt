@@ -158,40 +158,29 @@ class RegisterActivity : AppCompatActivity() {
 
 
     private fun saveUserData(uid: String, firstName: String, lastName: String, email: String) {
-        val user = User(firstName, lastName, email)
-        usersRef.child(uid).setValue(user)
-            .addOnSuccessListener {
-                Log.d("Firebase", "Data saved successfully")
-            }
-            .addOnFailureListener { e ->
-                Log.e("Firebase", "Save failed", e)
-                Toast.makeText(this, "Failed to save: ${e.message}", Toast.LENGTH_SHORT).show()
-            }
-
-        // ✅ Firestore
         val firestore = FirebaseFirestore.getInstance()
         val userMap = hashMapOf(
-            "name" to "$firstName $lastName",
+            "firstName" to firstName,
+            "lastName" to lastName,
             "email" to email,
-            "profilePicture" to null, // Tu peux le mettre à jour plus tard si tu ajoutes une photo
+            "profilePhotoUrl" to null,
             "settings" to mapOf(
                 "batterySaver" to true,
                 "gpsInterval" to 5
             )
         )
 
-        firestore.collection("users").document(uid).set(userMap)
+        firestore.collection("Utilisateurs").document(uid).set(userMap)
             .addOnSuccessListener {
-                Log.d("Firestore", "User added to Firestore!")
-                Toast.makeText(this, "Firestore: User saved", Toast.LENGTH_SHORT).show()
+                Log.d("Firestore", "✅ Utilisateur enregistré dans Firestore")
+                Toast.makeText(this, "Compte enregistré avec succès", Toast.LENGTH_SHORT).show()
             }
-            .addOnFailureListener { e ->
-                Log.e("Firestore", "Failed to save user to Firestore", e)
-                Toast.makeText(this, "Firestore error: ${e.message}", Toast.LENGTH_LONG).show()
+            .addOnFailureListener {
+                Log.e("Firestore", "❌ Échec Firestore", it)
+                Toast.makeText(this, "Erreur : ${it.message}", Toast.LENGTH_LONG).show()
             }
-        Log.d("RegisterActivity", "Trying to save Firestore user with uid=$uid")
-
     }
+
 
 
     // Fonction pour afficher ou masquer le password

@@ -7,6 +7,7 @@ import android.util.Log
 import android.widget.Toast
 import com.example.app.models.*
 import com.example.app.service.GpsTrackingService
+import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
@@ -51,7 +52,7 @@ object JourneyManager {
         val totalPhotos = itinerary.it_photos.size
 
         if (totalPhotos == 0) {
-            saveVoyageToFirestore(userId, voyageId, itinerary, firestorePoints, uploadedPhotos, context)
+            prepareVoyageAndSave(userId, voyageId, itinerary, firestorePoints, uploadedPhotos, context)
             return
         }
 
@@ -77,18 +78,18 @@ object JourneyManager {
                 uploadedPhotos.add(meta)
                 uploadCount++
                 if (uploadCount == totalPhotos) {
-                    saveVoyageToFirestore(userId, voyageId, itinerary, firestorePoints, uploadedPhotos, context)
+                    prepareVoyageAndSave(userId, voyageId, itinerary, firestorePoints, uploadedPhotos, context)
                 }
             }.addOnFailureListener {
                 uploadCount++
                 if (uploadCount == totalPhotos) {
-                    saveVoyageToFirestore(userId, voyageId, itinerary, firestorePoints, uploadedPhotos, context)
+                    prepareVoyageAndSave(userId, voyageId, itinerary, firestorePoints, uploadedPhotos, context)
                 }
             }
         }
     }
 
-    private fun saveVoyageToFirestore(
+    private fun prepareVoyageAndSave(
         userId: String,
         voyageId: String,
         itinerary: Itinerary,
@@ -96,36 +97,50 @@ object JourneyManager {
         photos: List<PhotoMeta>,
         context: Context
     ) {
-        val formatter = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-
-        val dateDebutLong = itinerary.date_debut ?: ""
-        val dateFinLong = itinerary.date_fin ?: ""
-
-
         val voyage = Voyage(
             id = voyageId,
             nom = itinerary.name ?: "Voyage sans nom",
             description = "",
             villeDepart = itinerary.ville_depart ?: "",
-            dateDebut = dateDebutLong,
-            dateFin = dateFinLong,
+            dateDebut = itinerary.date_debut ?: "",
+            dateFin = itinerary.date_fin ?: "",
             points = points,
-            photos = photos
+            photos = photos,
+            utilisateur = userId
         )
 
-        FirebaseFirestore.getInstance()
-            .collection("Utilisateurs").document(userId)
-            .collection("voyages").document(voyageId)
-            .set(voyage)
+        saveVoyageToFirestore(userId, voyage)
             .addOnSuccessListener {
                 Toast.makeText(context, "Voyage enregistré avec succès", Toast.LENGTH_SHORT).show()
-                Log.d("Firebase", "Voyage enregistré avec succès")
+                Log.d("Firebase", "✅ Voyage sauvegardé avec infos utilisateur")
                 currentItinerary = null
             }
             .addOnFailureListener { e ->
                 Toast.makeText(context, "Erreur: ${e.message}", Toast.LENGTH_SHORT).show()
-                Log.e("Firebase", "Erreur: ${e.message}")
+                Log.e("Firebase", "❌ Erreur Firestore : ${e.message}")
             }
+    }
+
+    fun saveVoyageToFirestore(userId: String, voyage: Voyage): Task<Void> {
+        val db = FirebaseFirestore.getInstance()
+        val userDocRef = db.collection("Utilisateurs").document(userId)
+
+        return userDocRef.get().continueWithTask { task ->
+            if (!task.isSuccessful) {
+                throw task.exception ?: Exception("Échec de la récupération de l'utilisateur")
+            }
+
+            val userSnap = task.result
+            val firstName = userSnap?.getString("firstName") ?: ""
+            val lastName = userSnap?.getString("lastName") ?: ""
+            val profileUrl = userSnap?.getString("profilePhotoUrl") ?: ""
+
+            voyage.ownerFirstName = firstName
+            voyage.ownerLastName = lastName
+            voyage.ownerPhotoUrl = profileUrl
+
+            userDocRef.collection("voyages").document(voyage.id).set(voyage)
+        }
     }
 
     private fun getPhotoDateFromExif(context: Context, uri: Uri): String {
@@ -138,7 +153,7 @@ object JourneyManager {
 
             dateString?.let {
                 val parsedDate = exifFormat.parse(it)
-                if (parsedDate != null) outputFormat.format(parsedDate) else outputFormat.format(Date())
+                parsedDate?.let { outputFormat.format(it) } ?: outputFormat.format(Date())
             } ?: outputFormat.format(Date())
         } catch (e: Exception) {
             e.printStackTrace()
