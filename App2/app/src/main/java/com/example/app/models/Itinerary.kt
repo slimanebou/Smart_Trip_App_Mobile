@@ -10,7 +10,8 @@ data class Itinerary(
     var date_fin: String? = null,
     var it_points: MutableList<GeoPoint> = mutableListOf(),
     var interst_points: MutableList<PointOfInterest> = mutableListOf(),
-    var it_photos: MutableList<PhotoModel> = mutableListOf()
+    var it_photos: MutableList<PhotoModel> = mutableListOf(),
+    var isPublic : Boolean =  false
 ) {
     fun ajouterPointInteret(poi: PointOfInterest) {
         interst_points.add(poi)

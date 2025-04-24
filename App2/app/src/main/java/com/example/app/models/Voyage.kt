@@ -21,7 +21,8 @@ data class Voyage(
     var utilisateur: String = "",
     var ownerFirstName: String? = null,
     var ownerLastName: String? = null,
-    var ownerPhotoUrl: String? = null
+    var ownerPhotoUrl: String? = null,
+    var isTripPublic : Boolean = false
 ) : Serializable
 
 fun Voyage.toItinerary(): Itinerary {

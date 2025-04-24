@@ -110,7 +110,7 @@ class MainActivity : AppCompatActivity() {
 
                 //  Quand il clique sur "Démarrer" :
                 fab.setImageResource(R.drawable.close)
-                navigateToHomeAndStartJourney(nomTrajet, villeDepart)
+                navigateToHomeAndStartJourney(nomTrajet, villeDepart, isPublicTrip)
             }
             .setNegativeButton("Annuler") { dialog, id ->
                 dialog.dismiss()
@@ -119,7 +119,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
-    private fun navigateToHomeAndStartJourney(nom: String, ville: String) {
+    private fun navigateToHomeAndStartJourney(nom: String, ville: String, isPublic : Boolean) {
 
         val homeFragment = HomeFragment()
         recording.value = true
@@ -128,6 +128,7 @@ class MainActivity : AppCompatActivity() {
         bundle.putBoolean("startJourney", true) // Démarrer le voyage
         bundle.putString("nom", nom)
         bundle.putString("ville", ville)
+        bundle.putBoolean("isPublic", isPublic)
         homeFragment.arguments = bundle
 
         //  Remplacer par HomeFragment avec les infos

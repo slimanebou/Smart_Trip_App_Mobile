@@ -1,5 +1,6 @@
 package com.example.app
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -55,10 +56,11 @@ class JourneyFragment : Fragment() {
         loadPublicTrips()
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     private fun loadPublicTrips() {
         FirebaseFirestore.getInstance()
             .collectionGroup("voyages")
-            .whereEqualTo("public", true)
+            .whereEqualTo("isTripPublic", true)
             .orderBy("dateDebut", Query.Direction.DESCENDING)
             .get()
             .addOnSuccessListener { snapshot ->

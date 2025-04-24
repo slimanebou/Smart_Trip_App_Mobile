@@ -20,7 +20,8 @@ object JourneyManager {
 
     var currentItinerary: Itinerary? = null
 
-    fun startJourney(context: Context, ville: String?, date: java.time.LocalDate, name: String?) {
+    fun startJourney(context: Context, ville: String?, date: java.time.LocalDate, name: String?,
+                     isPublic : Boolean) {
         Toast.makeText(context, "Voyage démarré !", Toast.LENGTH_SHORT).show()
 
         val dateFormatted = date.toString()
@@ -28,7 +29,8 @@ object JourneyManager {
         currentItinerary = Itinerary(
             name = name,
             ville_depart = ville,
-            date_debut = dateFormatted
+            date_debut = dateFormatted,
+            isPublic = isPublic
         )
 
         context.startService(Intent(context, GpsTrackingService::class.java))
@@ -106,7 +108,8 @@ object JourneyManager {
             dateFin = itinerary.date_fin ?: "",
             points = points,
             photos = photos,
-            utilisateur = userId
+            utilisateur = userId,
+            isTripPublic = itinerary.isPublic
         )
 
         saveVoyageToFirestore(userId, voyage)
