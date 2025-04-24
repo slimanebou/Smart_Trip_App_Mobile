@@ -14,6 +14,8 @@ import com.example.app.models.UserInfo
 import com.example.app.models.Voyage
 import java.text.SimpleDateFormat
 import java.util.*
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 
 class VoyageAdapterPublic(
     private val voyages: List<Voyage>,
@@ -63,7 +65,47 @@ class VoyageAdapterPublic(
 
             // Favoris par défaut en blanc (pas actif ici)
             favoriteIcon.setImageResource(R.drawable.favorite_white)
-        }
+
+
+            val userId = FirebaseAuth.getInstance().currentUser?.uid
+            if (userId != null) {
+                val favRef = FirebaseFirestore.getInstance()
+                    .collection("Utilisateurs")
+                    .document(userId)
+                    .collection("favoris")
+                    .document(voyage.id)
+
+                // 1) Afficher état initial du cœur
+                favRef.get().addOnSuccessListener { doc ->
+                    val isFav = doc.exists()
+                    favoriteIcon.setImageResource(
+                        if (isFav) R.drawable.favorite else R.drawable.favorite_white
+                    )
+                }
+// 2) Clic sur le cœur → toggle
+                favoriteIcon.setOnClickListener {
+                    favRef.get().addOnSuccessListener { doc ->
+                        if (doc.exists()) {
+                            // déjà favori → on supprime
+                            favRef.delete()
+                                .addOnSuccessListener {
+                                    favoriteIcon.setImageResource(R.drawable.favorite_white)
+                                }
+                        } else {
+                            // pas favori → on ajoute
+                            favRef.set(
+                                mapOf(
+                                    "tripId" to voyage.id,
+                                    "ownerId" to voyage.utilisateur
+                                ))
+                                .addOnSuccessListener {
+                                    favoriteIcon.setImageResource(R.drawable.favorite)
+                                }
+                        }
+                    }
+                }
+    }
+            }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VoyageViewHolder {

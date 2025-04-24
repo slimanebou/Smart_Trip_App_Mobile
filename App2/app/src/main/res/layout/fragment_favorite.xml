@@ -1,21 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
-    android:background="@color/dark_blue">
+    android:background="@color/dark_blue"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
-    <!-- Barre d'outils en haut avec les 3 points -->
+    <!-- Barre d’outils identique à MyTrips, mais titre “Favoris” -->
     <androidx.appcompat.widget.Toolbar
-        android:id="@+id/toolbar"
+        android:id="@+id/toolbarFavorite"
         android:paddingTop="40dp"
         android:paddingBottom="10dp"
         android:layout_width="match_parent"
         android:layout_height="90dp"
         android:background="@color/dark_blue"
         android:elevation="4dp"
-        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
         app:popupTheme="@style/ThemeOverlay.AppCompat.Light">
 
         <de.hdodenhof.circleimageview.CircleImageView
@@ -25,12 +24,12 @@
             android:src="@drawable/user_1"
             app:civ_border_width="2dp"
             app:civ_border_color="@color/white"
-            android:layout_marginRight="5dp"/>
+            android:layout_marginEnd="8dp"/>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Favorite"
+            android:text="Favoris"
             android:textColor="@android:color/white"
             android:textSize="25sp"
             android:textStyle="bold"/>
@@ -41,17 +40,15 @@
             android:layout_height="wrap_content"
             android:layout_gravity="end"
             android:layout_marginEnd="16dp"
-            android:src="@drawable/points"/>
-
+            android:src="@drawable/points"
+            android:tint="@android:color/white"/>
     </androidx.appcompat.widget.Toolbar>
 
-    <!-- RecyclerView pour la liste des élèves -->
+    <!-- RecyclerView qui affichera la liste des voyages favoris -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerViewFavorite"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:paddingBottom="?attr/actionBarSize"
         android:clipToPadding="false"/>
-
-
 </LinearLayout>
