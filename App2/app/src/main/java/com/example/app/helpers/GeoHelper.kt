@@ -33,4 +33,30 @@ object GeoHelper {
             null
         }
     }
+
+    suspend fun getCityAndCountryCode(lat: Double, lon: Double): Pair<String?, String?>? {
+        return withContext(Dispatchers.IO) {
+            try {
+                val url = URL("https://nominatim.openstreetmap.org/reverse?format=json&lat=$lat&lon=$lon")
+                val connection = url.openConnection() as HttpURLConnection
+                connection.requestMethod = "GET"
+                connection.setRequestProperty("User-Agent", "com.example.app/1.0")
+                connection.connectTimeout = 5000
+                connection.readTimeout = 5000
+
+                if (connection.responseCode == HttpURLConnection.HTTP_OK) {
+                    val response = connection.inputStream.bufferedReader().use { it.readText() }
+                    val jsonObject = JSONObject(response)
+                    val address = jsonObject.optJSONObject("address")
+                    val city = address?.optString("city") ?: address?.optString("town") ?: address?.optString("village")
+                    val countryCode = address?.optString("country_code")?.uppercase()
+                    return@withContext city to countryCode
+                }
+            } catch (e: Exception) {
+                Log.e("GeoHelper", "Erreur getCityAndCountryCode", e)
+            }
+            null
+        }
+    }
+
 }

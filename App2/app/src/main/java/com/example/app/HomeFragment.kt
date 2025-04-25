@@ -154,12 +154,13 @@ class HomeFragment : Fragment() {
         val nom = arguments?.getString("nom") ?: ""
         val ville = arguments?.getString("ville") ?: ""
         val isPublic = arguments?.getBoolean("isPublic") ?: false
+        val countryCode = arguments?.getString("countryCode") ?: ""
 
         if (PermissionHelper.hasLocationPermission(requireContext())) {
             showMap()
             loadCurrentPosition()
             if (shouldStartJourney) {
-                startJourney(ville, nom, isPublic)
+                startJourney(ville, nom, isPublic, countryCode)
             }
         } else {
             hideMap()
@@ -281,8 +282,9 @@ class HomeFragment : Fragment() {
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
-    fun startJourney(ville: String?, name: String?, isPublic : Boolean) {
-        JourneyManager.startJourney(requireContext(), ville, java.time.LocalDate.now(), name, isPublic)
+    fun startJourney(ville: String?, name: String?, isPublic : Boolean, countryCode : String) {
+        JourneyManager.startJourney(requireContext(), ville, java.time.LocalDate.now(), name,
+            isPublic, countryCode)
     }
 
     fun stopJourney() {

@@ -1,19 +1,23 @@
 package com.example.app
 
+import android.annotation.SuppressLint
 import android.os.Build
 import android.os.Bundle
 import android.widget.CheckBox
+import android.widget.EditText
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.lifecycleScope
 import com.example.app.databinding.ActivityMainBinding
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.example.app.helpers.PermissionHelper
-
+import com.google.android.gms.location.LocationServices
+import kotlinx.coroutines.launch
 
 
 class MainActivity : AppCompatActivity() {
@@ -91,35 +95,59 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    @SuppressLint("CutPasteId", "MissingPermission")
     @RequiresApi(Build.VERSION_CODES.O)
     fun showStartJourneyDialog() {
         val dialogView = layoutInflater.inflate(R.layout.dialog_start_journey, null)
 
-        // Récupérer l'état de la CheckBox
-        isPublicTrip = dialogView.findViewById<CheckBox>(R.id.trajetPublicCheckBox).isChecked
+        val villeDepartInput = dialogView.findViewById<EditText>(R.id.villeDepartInput)
+        val nomTrajetInput = dialogView.findViewById<EditText>(R.id.nomTrajetInput)
+        val trajetPublicCheckBox = dialogView.findViewById<CheckBox>(R.id.trajetPublicCheckBox)
 
+        // 🔁 Détection automatique de la ville + pays
+        val fusedClient = LocationServices.getFusedLocationProviderClient(this)
+        if (PermissionHelper.hasLocationPermission(this)) {
+            fusedClient.lastLocation.addOnSuccessListener { location ->
+                if (location != null) {
+                    lifecycleScope.launch {
+                        val result = com.example.app.helpers.GeoHelper.getCityAndCountryCode(
+                            location.latitude,
+                            location.longitude
+                        )
+                        val villeAuto = result?.first
+                        val codePays = result?.second
+
+                        villeDepartInput.setText(villeAuto ?: "")
+                        villeDepartInput.tag = codePays //  Stocke le countryCode dans le champ invisible
+                    }
+                }
+            }
+        }
 
         val builder = AlertDialog.Builder(this)
         builder.setView(dialogView)
             .setCancelable(false)
             .setPositiveButton("Démarrer") { dialog, id ->
-                val nomTrajet =
-                    dialogView.findViewById<android.widget.EditText>(R.id.nomTrajetInput).text.toString()
-                val villeDepart =
-                    dialogView.findViewById<android.widget.EditText>(R.id.villeDepartInput).text.toString()
+                val nomTrajet = nomTrajetInput.text.toString()
+                val villeDepart = villeDepartInput.text.toString()
+                val countryCode = villeDepartInput.tag as String // Récupère ce qu'on a mis plus haut
+                isPublicTrip = trajetPublicCheckBox.isChecked
 
-                //  Quand il clique sur "Démarrer" :
                 fab.setImageResource(R.drawable.close)
-                navigateToHomeAndStartJourney(nomTrajet, villeDepart, isPublicTrip)
+                navigateToHomeAndStartJourney(nomTrajet, villeDepart, isPublicTrip, countryCode)
             }
             .setNegativeButton("Annuler") { dialog, id ->
                 dialog.dismiss()
             }
+
         builder.create().show()
     }
 
+
+
     @RequiresApi(Build.VERSION_CODES.O)
-    private fun navigateToHomeAndStartJourney(nom: String, ville: String, isPublic : Boolean) {
+    private fun navigateToHomeAndStartJourney(nom: String, ville: String, isPublic : Boolean,
+                                              countryCode : String) {
 
         val homeFragment = HomeFragment()
         recording.value = true
@@ -129,6 +157,7 @@ class MainActivity : AppCompatActivity() {
         bundle.putString("nom", nom)
         bundle.putString("ville", ville)
         bundle.putBoolean("isPublic", isPublic)
+        bundle.putString("countryCode", countryCode)
         homeFragment.arguments = bundle
 
         //  Remplacer par HomeFragment avec les infos
@@ -150,7 +179,7 @@ class MainActivity : AppCompatActivity() {
                 } else {
                     //  HomeFragment pas prêt → on attend qu'il soit affiché
                     replaceFragment(HomeFragment(), R.id.home)
-                    supportFragmentManager.executePendingTransactions() // 💡 Force le chargement immédiat
+                    supportFragmentManager.executePendingTransactions() //  Force le chargement immédiat
                     val newFragment = supportFragmentManager.findFragmentById(R.id.frame_layout)
                     if (newFragment is HomeFragment) {
                         newFragment.stopJourney()

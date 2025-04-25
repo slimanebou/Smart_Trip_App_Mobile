@@ -1,5 +1,6 @@
 package com.example.app.managers
 
+import android.annotation.SuppressLint
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -29,7 +30,9 @@ class VoyageAdapterPublic(
         val profileName: TextView = itemView.findViewById(R.id.profileName)
         val profileImage: ImageView = itemView.findViewById(R.id.profileImage)
         val favoriteIcon: ImageView = itemView.findViewById(R.id.favoriteIcon)
+        val textCity : TextView = itemView.findViewById(R.id.textCity)
 
+        @SuppressLint("SetTextI18n")
         fun bind(voyage: Voyage) {
             titleText.text = voyage.nom
             val formattedDates = itemView.context.getString(
@@ -38,6 +41,10 @@ class VoyageAdapterPublic(
                 formatDateString(voyage.dateFin)
             )
             datesText.text = formattedDates
+            val countryCode = voyage.countryCode ?: ""
+            val city = voyage.villeDepart ?: "Ville"
+            val flag = countryCodeToFlag(countryCode)
+            textCity.text = "$flag $city"
 
             val imageUrl = voyage.coverPhotoUrl ?: voyage.photos.firstOrNull()?.url
             if (imageUrl != null) {
@@ -131,4 +138,11 @@ class VoyageAdapterPublic(
             "?"
         }
     }
+
+    private fun countryCodeToFlag(code: String): String {
+        return code.uppercase()
+            .map { char -> Character.toChars(0x1F1E6 - 'A'.code + char.code).concatToString() }
+            .joinToString("")
+    }
+
 }
