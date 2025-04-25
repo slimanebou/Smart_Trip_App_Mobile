@@ -22,6 +22,15 @@
     <string name="profile_image_desc">Profile picture</string>
     <string name="label_profile_name_placeholder">User Name</string>
     <string name="favorite_icon_desc">Favorite</string>
+    <string name="label_poi_name">POI Name</string>
+    <string name="hint_poi_name">e.g. “Café Central”</string>
+    <string name="label_poi_comments">Comments</string>
+    <string name="hint_poi_comments">Your notes…</string>
+    <string name="edit_poi">Edit POI</string>
+    <string name="delete_poi">Delete POI</string>
+    <string name="view_pois">View POIs</string>
+    <string name="add_poi">Add POI</string>
+    <string name="no_pois">No points of interest</string>
     <!-- TODO: Remove or change this placeholder text -->
 
 </resources>

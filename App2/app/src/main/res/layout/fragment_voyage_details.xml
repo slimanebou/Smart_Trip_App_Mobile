@@ -1,14 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/voyageDetailsContainer"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-
     <org.osmdroid.views.MapView
         android:id="@+id/mapVoyage"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        />
+        android:layout_height="match_parent"/>
 
+    <!-- Bouton “Voir les POI” en haut à droite -->
+    <ImageButton
+        android:id="@+id/btnViewPois"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_gravity="top|end"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        android:padding="8dp"
+        android:src="@android:drawable/ic_menu_mylocation"
+        android:background="?android:attr/selectableItemBackgroundBorderless"
+        android:contentDescription="@string/view_pois"/>
 </FrameLayout>
