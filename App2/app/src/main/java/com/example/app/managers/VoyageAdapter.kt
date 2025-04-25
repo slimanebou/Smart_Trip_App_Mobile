@@ -4,6 +4,7 @@ import android.app.AlertDialog
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
@@ -21,7 +22,8 @@ import java.util.*
 class VoyageAdapter(
     private val voyages: List<Voyage>,
     private val onItemClick: (Voyage) -> Unit,
-    private val onImageClick: (Voyage) -> Unit
+    private val onImageClick: (Voyage) -> Unit,
+    private val onEditClick: (Voyage) -> Unit
 ) : RecyclerView.Adapter<VoyageAdapter.VoyageViewHolder>() {
 
     inner class VoyageViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -38,6 +40,7 @@ class VoyageAdapter(
                 formatDateString(voyage.dateDebut),
                 formatDateString(voyage.dateFin)
             )
+
 
             // Image de couverture
             val imageUrl = voyage.coverPhotoUrl ?: voyage.photos.firstOrNull()?.url
@@ -114,6 +117,9 @@ class VoyageAdapter(
                         Toast.LENGTH_SHORT).show()
                 }
             }
+
+            itemView.findViewById<ImageButton>(R.id.btnEditTrip)
+                .setOnClickListener { onEditClick(voyage) }
         }
 
         private fun formatDateString(dateStr: String?): String {
@@ -131,7 +137,7 @@ class VoyageAdapter(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VoyageViewHolder {
         val view = LayoutInflater.from(parent.context)
-            .inflate(R.layout.item_voyage, parent, false)
+            .inflate(R.layout.item_my_trip, parent, false)
         return VoyageViewHolder(view)
     }
 

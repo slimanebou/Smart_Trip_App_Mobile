@@ -6,6 +6,22 @@
     <string name="nom_du_trajet">Strip Name </string>
     <string name="trip_dates">Du %1$s au %2$s</string>
     <string name="voyage_image_desc">Image du voyage</string>
+    <string name="edit_trip">Modifier le voyage</string>
+    <string name="label_trip_name">Trip name</string>
+    <string name="hint_trip_name">Enter trip name</string>
+    <string name="label_description">Description</string>
+    <string name="hint_description">Enter description</string>
+    <string name="label_country_code">Country code</string>
+    <string name="hint_country_code">e.g. US</string>
+    <string name="label_departure_city">Departure city</string>
+    <string name="hint_departure_city">e.g. Paris</string>
+    <string name="label_public_trip">Public trip?</string>
+    <string name="label_city_placeholder">City</string>
+    <string name="label_trip_name_sample">My awesome trip</string>
+    <string name="label_trip_dates_sample">Jan 1 – Jan 2, 2024</string>
+    <string name="profile_image_desc">Profile picture</string>
+    <string name="label_profile_name_placeholder">User Name</string>
+    <string name="favorite_icon_desc">Favorite</string>
     <!-- TODO: Remove or change this placeholder text -->
 
 </resources>

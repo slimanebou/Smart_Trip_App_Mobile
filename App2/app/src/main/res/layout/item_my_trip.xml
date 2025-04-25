@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView 
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/cardViewVoyage"
+    android:layout_width="match_parent"
+    android:layout_height="200dp"
+    android:layout_margin="10dp"
+    card_view:cardCornerRadius="10dp"
+    card_view:cardElevation="8dp">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <!-- Image de fond -->
+        <ImageView
+            android:id="@+id/imageVoyage"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:contentDescription="@string/voyage_image_desc"
+            android:scaleType="centerCrop" />
+
+        <!-- Overlay sombre -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#66000000" />
+
+        <!-- Texte indicatif de ville (facultatif) -->
+        <TextView
+            android:id="@+id/textCity"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="16dp"
+            android:layout_marginTop="16dp"
+            android:text="🇫🇷 Paris"
+            android:textColor="@android:color/white"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+        <!-- Contenu principal (titre, dates, profil, favoris) -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="bottom"
+            android:orientation="vertical"
+            android:padding="20dp">
+
+            <!-- Titre du voyage -->
+            <TextView
+                android:id="@+id/textTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Nom du trip"
+                android:textColor="@android:color/white"
+                android:textSize="24sp"
+                android:textStyle="bold" />
+
+            <!-- Dates du voyage -->
+            <TextView
+                android:id="@+id/textDate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:text="Du 01/01/2024 au 02/01/2024"
+                android:textColor="@android:color/white"
+                android:textSize="14sp" />
+
+            <!-- Profile + Favoris -->
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp">
+
+                <!-- Photo de profil + nom -->
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:id="@+id/profileImage"
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:layout_marginEnd="8dp"
+                        android:background="@drawable/circle_border_white"
+                        android:padding="2dp"
+                        android:scaleType="centerCrop"
+                        android:src="@drawable/user_1"
+                        android:contentDescription="@string/profile_image_desc" />
+
+                    <TextView
+                        android:id="@+id/profileName"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text=""
+                        android:textColor="@android:color/white"
+                        android:textSize="14sp" />
+                </LinearLayout>
+
+                <!-- Icône Favoris -->
+                <ImageView
+                    android:id="@+id/favoriteIcon"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:src="@drawable/favorite_white"
+                    android:contentDescription="@string/favorite_icon_desc" />
+            </RelativeLayout>
+        </LinearLayout>
+
+        <!-- Engrenage d’édition (MyTrips uniquement) -->
+        <ImageButton
+            android:id="@+id/btnEditTrip"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_gravity="top|end"
+            android:layout_margin="8dp"
+            android:src="@drawable/setting"
+            android:contentDescription="@string/edit_trip"
+            app:tint="@android:color/white"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:elevation="10dp" />
+
+    </FrameLayout>
+</androidx.cardview.widget.CardView>

@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="24dp">
+
+        <!-- Trip name label + input -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/label_trip_name"
+            android:textStyle="bold"
+            android:paddingBottom="4dp"/>
+        <EditText
+            android:id="@+id/editName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/hint_trip_name"
+            android:autofillHints="name"
+            android:inputType="textPersonName"
+            android:minHeight="48dp"/>
+
+        <!-- Description label + input -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/label_description"
+            android:textStyle="bold"
+            android:paddingTop="16dp"
+            android:paddingBottom="4dp"/>
+        <EditText
+            android:id="@+id/editDescription"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/hint_description"
+            android:autofillHints="none"
+            android:inputType="textMultiLine"
+            android:minHeight="48dp"/>
+
+        <!-- Country code label + input -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/label_country_code"
+            android:textStyle="bold"
+            android:paddingTop="16dp"
+            android:paddingBottom="4dp"/>
+        <EditText
+            android:id="@+id/editCountryCode"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/hint_country_code"
+            android:autofillHints="none"
+            android:inputType="text"
+            android:minHeight="48dp"/>
+
+        <!-- Departure city label + input -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/label_departure_city"
+            android:textStyle="bold"
+            android:paddingTop="16dp"
+            android:paddingBottom="4dp"/>
+        <EditText
+            android:id="@+id/editCity"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/hint_departure_city"
+            android:autofillHints="none"
+            android:inputType="text"
+            android:minHeight="48dp"/>
+
+        <!-- Public trip switch -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingTop="16dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/label_public_trip"
+                android:textStyle="bold"/>
+
+            <androidx.appcompat.widget.SwitchCompat
+                android:id="@+id/switchPublic"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:contentDescription="@string/label_public_trip"
+                android:minWidth="48dp"
+                android:minHeight="48dp"
+                android:autofillHints="none"/>
+        </LinearLayout>
+
+    </LinearLayout>
+</ScrollView>

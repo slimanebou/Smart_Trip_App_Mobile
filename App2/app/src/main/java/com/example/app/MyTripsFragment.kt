@@ -13,6 +13,7 @@ import com.example.app.managers.VoyageAdapter
 import com.example.app.models.Voyage
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import androidx.appcompat.widget.SwitchCompat
 
 class MyTripsFragment : Fragment() {
 
@@ -64,7 +65,10 @@ class MyTripsFragment : Fragment() {
                     }
                     .setNegativeButton("Annuler", null)
                     .show()
-            }
+
+
+            },
+                    onEditClick = { voyage -> showEditDialog(voyage) }
         )
 
         recyclerView.adapter = adapter
@@ -88,6 +92,54 @@ class MyTripsFragment : Fragment() {
             }
             .addOnFailureListener { e -> e.printStackTrace() }
     }
+
+
+    private fun showEditDialog(voyage: Voyage) {
+        // 1) Inflater le layout de dialogue (à créer en res/layout/dialog_edit_voyage.xml)
+        val dialogView = layoutInflater.inflate(R.layout.dialog_edit_voyage, null)
+
+        // 2) Pré-remplir les champs
+        dialogView.findViewById<EditText>(R.id.editName)
+            .setText(voyage.nom)
+        dialogView.findViewById<EditText>(R.id.editDescription)
+            .setText(voyage.description)
+        dialogView.findViewById<EditText>(R.id.editCountryCode)
+            .setText(voyage.countryCode)
+        dialogView.findViewById<EditText>(R.id.editCity)
+            .setText(voyage.villeDepart)
+        dialogView.findViewById<SwitchCompat>(R.id.switchPublic)
+            .isChecked = voyage.isTripPublic
+
+        // 3) Construire et afficher l'AlertDialog
+        AlertDialog.Builder(requireContext())
+            .setTitle("Modifier le voyage")
+            .setView(dialogView)
+            .setPositiveButton("Enregistrer") { _, _ ->
+                // 4) Récupérer les nouvelles valeurs
+                val newName = dialogView.findViewById<EditText>(R.id.editName).text.toString()
+                val newDesc = dialogView.findViewById<EditText>(R.id.editDescription).text.toString()
+                val newCountry = dialogView.findViewById<EditText>(R.id.editCountryCode).text.toString()
+                val newCity = dialogView.findViewById<EditText>(R.id.editCity).text.toString()
+                val newPublic = dialogView.findViewById<SwitchCompat>(R.id.switchPublic).isChecked
+
+                // 5) Mettre à jour dans Firestore
+                FirebaseFirestore.getInstance()
+                    .collection("Utilisateurs")
+                    .document(voyage.utilisateur)
+                    .collection("voyages")
+                    .document(voyage.id)
+                    .update(
+                        "nom", newName,
+                        "description", newDesc,
+                        "countryCode", newCountry,
+                        "villeDepart", newCity,
+                        "tripPublic", newPublic
+                    )
+            }
+            .setNegativeButton("Annuler", null)
+            .show()
+    }
+
 
     override fun onDestroyView() {
         super.onDestroyView()
