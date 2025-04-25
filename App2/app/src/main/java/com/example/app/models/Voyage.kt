@@ -14,7 +14,6 @@ data class Voyage(
     var villeDepart: String = "",
     var dateDebut: String = "",
     var dateFin: String = "",
-    var isPublic: Boolean = false,
     var points: List<FirestoreGeoPoint> = emptyList(),
     var photos: List<PhotoMeta> = emptyList(),
     var coverPhotoUrl: String? = null,
@@ -41,6 +40,7 @@ fun Voyage.toItinerary(): Itinerary {
                 attachedPoiName = it.commentaire,
                 urlFirebase = it.url
             )
-        }.toMutableList()
+        }.toMutableList(),
+        isPublic = isTripPublic
     )
 }

@@ -1,6 +1,7 @@
 package com.example.app.managers
 
 import android.annotation.SuppressLint
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -19,9 +20,10 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
 class VoyageAdapterPublic(
-    private val voyages: List<Voyage>,
     private val onItemClick: (Voyage) -> Unit
 ) : RecyclerView.Adapter<VoyageAdapterPublic.VoyageViewHolder>() {
+
+    private val voyages = mutableListOf<Voyage>()
 
     inner class VoyageViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val imageVoyage: ImageView = itemView.findViewById(R.id.imageVoyage)
@@ -125,7 +127,10 @@ class VoyageAdapterPublic(
         holder.bind(voyages[position])
     }
 
-    override fun getItemCount(): Int = voyages.size
+    override fun getItemCount(): Int {
+        return voyages.size
+    }
+
 
     private fun formatDateString(dateStr: String?): String {
         if (dateStr.isNullOrBlank()) return "?"
@@ -144,5 +149,13 @@ class VoyageAdapterPublic(
             .map { char -> Character.toChars(0x1F1E6 - 'A'.code + char.code).concatToString() }
             .joinToString("")
     }
+
+    @SuppressLint("NotifyDataSetChanged")
+    fun updateList(newList: List<Voyage>) {
+        voyages.clear()
+        voyages.addAll(newList)
+        notifyDataSetChanged()
+    }
+
 
 }

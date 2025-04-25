@@ -31,7 +31,7 @@ class FavoriteFragment : Fragment() {
         // 1) Configuration du RecyclerView
         recyclerView = view.findViewById(R.id.recyclerViewFavorite)
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
-        adapter = VoyageAdapterPublic(favorisList) { voyage ->
+        adapter = VoyageAdapterPublic() { voyage ->
             // Clic sur un favori → Détails
             val details = VoyageDetailsFragment().apply {
                 arguments = Bundle().apply { putSerializable("voyage", voyage) }

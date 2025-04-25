@@ -68,9 +68,25 @@
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerViewJourney"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
         android:paddingBottom="?attr/actionBarSize"
         android:clipToPadding="false"/>
+
+
+    <TextView
+        android:id="@+id/emptyText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Aucun voyage trouvé"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:textColor="#FF0000"
+        android:gravity="center"
+        android:padding="16dp"
+        android:visibility="gone" />
+
+
 
 
 
