@@ -79,18 +79,28 @@ class MyTripsFragment : Fragment() {
 
     private fun loadVoyages(userId: String) {
         FirebaseFirestore.getInstance()
-            .collection("Utilisateurs").document(userId)
+            .collection("Utilisateurs")
+            .document(userId)
             .collection("voyages")
             .get()
             .addOnSuccessListener { result ->
                 voyages.clear()
                 for (doc in result) {
-                    val voyage = doc.toObject(Voyage::class.java)
+                    // Transforme en Voyage ET injecte l'owner et l'id
+                    val voyage = doc.toObject(Voyage::class.java).apply {
+                        id = doc.id
+                        utilisateur = userId
+                    }
                     voyages.add(voyage)
                 }
                 adapter.notifyDataSetChanged()
             }
-            .addOnFailureListener { e -> e.printStackTrace() }
+            .addOnFailureListener { e ->
+                e.printStackTrace()
+                Toast.makeText(requireContext(),
+                    "Erreur de chargement des voyages",
+                    Toast.LENGTH_SHORT).show()
+            }
     }
 
 

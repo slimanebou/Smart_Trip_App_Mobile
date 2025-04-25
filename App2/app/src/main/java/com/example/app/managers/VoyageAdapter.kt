@@ -27,24 +27,30 @@ class VoyageAdapter(
 ) : RecyclerView.Adapter<VoyageAdapter.VoyageViewHolder>() {
 
     inner class VoyageViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        private val imageVoyage: ImageView = itemView.findViewById(R.id.imageVoyage)
-        private val titleText: TextView = itemView.findViewById(R.id.textTitle)
-        private val datesText: TextView = itemView.findViewById(R.id.textDate)
-        private val favoriteIcon: ImageView = itemView.findViewById(R.id.favoriteIcon)
+        // --- vues existantes ---
+        private val imageVoyage: ImageView    = itemView.findViewById(R.id.imageVoyage)
+        private val titleText: TextView       = itemView.findViewById(R.id.textTitle)
+        private val datesText: TextView       = itemView.findViewById(R.id.textDate)
+        private val favoriteIcon: ImageView   = itemView.findViewById(R.id.favoriteIcon)
+        private val editButton: ImageButton   = itemView.findViewById(R.id.btnEditTrip)
+
+        // --- NOUVEAU : vues profil & ville/drapeau ---
+        private val profileImage: ImageView   = itemView.findViewById(R.id.profileImage)
+        private val profileName: TextView     = itemView.findViewById(R.id.profileName)
+        private val textCity: TextView        = itemView.findViewById(R.id.textCity)
 
         fun bind(voyage: Voyage) {
-            // Titre et dates
+            // Titre & dates
             titleText.text = voyage.nom
-            datesText.text = itemView.context.getString(
+            datesText.text  = itemView.context.getString(
                 R.string.trip_dates,
                 formatDateString(voyage.dateDebut),
                 formatDateString(voyage.dateFin)
             )
 
-
-            // Image de couverture
+            // COUVERTURE
             val imageUrl = voyage.coverPhotoUrl ?: voyage.photos.firstOrNull()?.url
-            if (imageUrl != null) {
+            if (!imageUrl.isNullOrBlank()) {
                 Glide.with(itemView.context)
                     .load(imageUrl)
                     .placeholder(R.drawable.image_placeholder)
@@ -54,84 +60,91 @@ class VoyageAdapter(
                 imageVoyage.setImageResource(R.drawable.image_placeholder)
             }
 
-            // Clics sur image et titre
+            // CLICS sur image et titre
             imageVoyage.setOnClickListener { onItemClick(voyage) }
             titleText.setOnClickListener { onImageClick(voyage) }
-            titleText.apply {
-                setTextColor(ContextCompat.getColor(context, R.color.purple_500))
-                paint.isUnderlineText = true
-            }
 
-            // Gestion du favori via Firestore
-            val userId = FirebaseAuth.getInstance().currentUser?.uid
-            if (userId != null) {
+            // --- NOUVEAU : afficher ville + drapeau ---
+            val countryCode = voyage.countryCode ?: ""
+            val city        = voyage.villeDepart ?: ""
+            textCity.text   = "${countryCodeToFlag(countryCode)} $city"
+
+            // --- NOUVEAU : afficher profil du propriétaire ---
+            val fullName = listOfNotNull(voyage.ownerFirstName, voyage.ownerLastName)
+                .joinToString(" ")
+                .ifBlank { "(You)" }
+            profileName.text = fullName
+
+            Glide.with(itemView.context)
+                .load(voyage.ownerPhotoUrl)
+                .placeholder(R.drawable.user_1)
+                .circleCrop()
+                .into(profileImage)
+
+            // FAVORIS
+            val currentUid = FirebaseAuth.getInstance().currentUser?.uid
+            if (currentUid != null) {
                 val favRef = FirebaseFirestore.getInstance()
                     .collection("Utilisateurs")
-                    .document(userId)
+                    .document(currentUid)
                     .collection("favoris")
                     .document(voyage.id)
 
-                // Affiche l’état initial du cœur
+                // état initial
                 favRef.get().addOnSuccessListener { doc ->
-                    val isFav = doc.exists()
                     favoriteIcon.setImageResource(
-                        if (isFav) R.drawable.favorite
-                        else       R.drawable.favorite_white
+                        if (doc.exists()) R.drawable.favorite
+                        else              R.drawable.favorite_white
                     )
                 }
-
-                // Toggle favori au clic
+                // toggle au clic
                 favoriteIcon.setOnClickListener {
                     favRef.get().addOnSuccessListener { doc ->
                         if (doc.exists()) {
-                            // Supprimer des favoris
-                            favRef.delete()
-                                .addOnSuccessListener {
-                                    favoriteIcon.setImageResource(R.drawable.favorite_white)
-                                }
-                                .addOnFailureListener {
-                                    Toast.makeText(itemView.context,
-                                        "Erreur suppression favori",
-                                        Toast.LENGTH_SHORT).show()
-                                }
+                            favRef.delete().addOnSuccessListener {
+                                favoriteIcon.setImageResource(R.drawable.favorite_white)
+                            }
                         } else {
-                            // Ajouter aux favoris
                             favRef.set(mapOf(
                                 "tripId" to voyage.id,
                                 "ownerId" to voyage.utilisateur
                             )).addOnSuccessListener {
                                 favoriteIcon.setImageResource(R.drawable.favorite)
-                            }.addOnFailureListener {
-                                Toast.makeText(itemView.context,
-                                    "Erreur ajout favori",
-                                    Toast.LENGTH_SHORT).show()
                             }
                         }
                     }
                 }
             } else {
-                // Pas connecté, proposer de se loguer
                 favoriteIcon.setOnClickListener {
                     Toast.makeText(itemView.context,
-                        "Connectez-vous pour gérer vos favoris",
+                        "Please log in to manage favorites",
                         Toast.LENGTH_SHORT).show()
                 }
             }
 
-            itemView.findViewById<ImageButton>(R.id.btnEditTrip)
-                .setOnClickListener { onEditClick(voyage) }
+            // BOUTON ÉDITION
+            editButton.setOnClickListener { onEditClick(voyage) }
         }
 
         private fun formatDateString(dateStr: String?): String {
             if (dateStr.isNullOrBlank()) return "?"
             return try {
-                val parser = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+                val parser    = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
                 val formatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
                 val date = parser.parse(dateStr)
                 formatter.format(date!!)
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 "?"
             }
+        }
+
+        // --- NOUVEAU : utilitaire drapeau à partir du countryCode ---
+        private fun countryCodeToFlag(code: String): String {
+            return code.uppercase()
+                .map { char ->
+                    Character.toChars(0x1F1E6 - 'A'.code + char.code).concatToString()
+                }
+                .joinToString("")
         }
     }
 
