@@ -71,7 +71,7 @@ class FavoriteFragment : Fragment() {
                             tripDoc.toObject(Voyage::class.java)?.let { voyage ->
                                 voyage.id = tripDoc.id
                                 favorisList.add(voyage)
-                                adapter.notifyDataSetChanged()
+                                adapter.updateList(favorisList)
                             }
                         }
                         .addOnFailureListener {
