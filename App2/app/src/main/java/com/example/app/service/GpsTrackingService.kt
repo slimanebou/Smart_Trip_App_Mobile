@@ -1,8 +1,10 @@
 
 package com.example.app.service
 
+import android.annotation.SuppressLint
 import android.app.*
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.IBinder
@@ -11,8 +13,10 @@ import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import com.example.app.R
+import com.example.app.helpers.PermissionHelper
 import com.example.app.managers.JourneyManager
 import com.example.app.managers.PointOfInterestDetector
+import com.example.app.receivers.BatteryReceiver
 import com.google.android.gms.location.*
 import org.osmdroid.util.GeoPoint
 
@@ -22,10 +26,20 @@ class GpsTrackingService : Service() {
     private lateinit var locationRequest: LocationRequest
     private lateinit var locationCallback: LocationCallback
     private var poiDetector: PointOfInterestDetector? = null
+    private var batteryReceiver: BatteryReceiver? = null
 
     override fun onCreate() {
         super.onCreate()
         Log.d("SERVICE", "GpsTrackingService lancé")
+        instance = this
+
+        batteryReceiver = BatteryReceiver {
+            Log.d("BATTERY", "Niveau critique détecté → Pause du voyage")
+            pauseTrackingGps()
+        }
+
+        val intentFilter = IntentFilter(Intent.ACTION_BATTERY_CHANGED)
+        registerReceiver(batteryReceiver, intentFilter)
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 5000L)
@@ -54,15 +68,21 @@ class GpsTrackingService : Service() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         startForeground(NOTIFICATION_ID, buildNotification())
         if (checkSelfPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper())
+            fusedLocationClient.requestLocationUpdates(
+                locationRequest,
+                locationCallback,
+                Looper.getMainLooper()
+            )
         }
         return START_STICKY
     }
 
     override fun onDestroy() {
         super.onDestroy()
+        instance = null
         fusedLocationClient.removeLocationUpdates(locationCallback)
         Log.d("SERVICE", "GpsTrackingService arrêté")
+        batteryReceiver?.let { unregisterReceiver(it) }
     }
 
     override fun onBind(intent: Intent?): IBinder? = null
@@ -70,7 +90,8 @@ class GpsTrackingService : Service() {
     @RequiresApi(Build.VERSION_CODES.O)
     private fun buildNotification(): Notification {
         val manager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
-        val channel = NotificationChannel(CHANNEL_ID, CHANNEL_NAME, NotificationManager.IMPORTANCE_LOW)
+        val channel =
+            NotificationChannel(CHANNEL_ID, CHANNEL_NAME, NotificationManager.IMPORTANCE_LOW)
         manager.createNotificationChannel(channel)
 
         return NotificationCompat.Builder(this, CHANNEL_ID)
@@ -86,6 +107,7 @@ class GpsTrackingService : Service() {
         const val CHANNEL_ID = "gps_channel"
         const val CHANNEL_NAME = "Suivi GPS"
         var paused: Boolean = false
+        var instance: GpsTrackingService? = null
     }
 
     fun stopTracking() {
@@ -94,5 +116,26 @@ class GpsTrackingService : Service() {
         }
         stopForeground(STOP_FOREGROUND_REMOVE)
         stopSelf()
+    }
+
+    fun pauseTrackingGps() {
+        if (!paused) {
+            fusedLocationClient.removeLocationUpdates(locationCallback)
+            paused = true
+            Log.d("GPS", "Tracking mis en pause")
+        }
+    }
+
+    @SuppressLint("MissingPermission")
+    fun resumeTrackingGps() {
+        if (paused && PermissionHelper.hasLocationPermission(this)) {
+            fusedLocationClient.requestLocationUpdates(
+                locationRequest,
+                locationCallback,
+                Looper.getMainLooper()
+            )
+            paused = false
+            Log.d("GPS", "Tracking repris")
+        }
     }
 }

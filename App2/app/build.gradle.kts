@@ -83,4 +83,7 @@ dependencies {
     //Dependencies of OSM
     implementation(libs.osmdroid.android)
 
+    implementation(libs.okhttp)
+
+
 }

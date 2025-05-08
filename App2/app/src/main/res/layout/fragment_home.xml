@@ -119,6 +119,18 @@
                     android:src="@drawable/ic_add_photo"/>
 
 
+                <ImageButton
+                    android:id="@+id/btnCenterMap"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:src="@drawable/ic_my_location"
+                    android:background="@drawable/round_button_background"
+                    android:contentDescription="@string/centrer_ma_position"
+                    android:layout_gravity="bottom|end"
+                    android:layout_margin="16dp"/>
+
+
+
             </FrameLayout>
 
             <LinearLayout

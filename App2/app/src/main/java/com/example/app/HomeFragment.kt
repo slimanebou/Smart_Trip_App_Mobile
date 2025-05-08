@@ -18,6 +18,7 @@ import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import com.example.app.MainActivity.Companion.recording
 import com.example.app.databinding.FragmentHomeBinding
 import com.example.app.utils.MapConfigurator
@@ -39,6 +40,8 @@ import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 import java.io.File
 import com.bumptech.glide.Glide
+import com.example.app.helpers.MapHelper
+import com.example.app.helpers.MapSearchHelper
 
 
 class HomeFragment : Fragment() {
@@ -119,9 +122,12 @@ class HomeFragment : Fragment() {
         return binding.root
     }
 
+    @SuppressLint("MissingPermission")
     @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+
 
 
         // Initialisation
@@ -148,6 +154,18 @@ class HomeFragment : Fragment() {
             addPhotoButton.visibility = if (isRecording) View.VISIBLE else View.GONE
 
         }
+
+        binding.btnCenterMap.setOnClickListener {
+            MapHelper.centerOnUserPosition(requireContext(), binding.mapView)
+        }
+
+        MapSearchHelper.setupSearchBar(
+            binding.editTextText2,
+            binding.mapView,
+            lifecycleScope,
+            requireContext()
+        )
+
 
 
         val shouldStartJourney = arguments?.getBoolean("startJourney", false) == true
@@ -228,14 +246,14 @@ class HomeFragment : Fragment() {
             resumeButton.visibility = View.GONE
 
             pauseButton.setOnClickListener {
-                GpsTrackingService.paused = true
+                GpsTrackingService.instance?.pauseTrackingGps()
                 Toast.makeText(requireContext(), "Pause du trajet", Toast.LENGTH_SHORT).show()
                 pauseButton.visibility = View.GONE
                 resumeButton.visibility = View.VISIBLE
             }
 
             resumeButton.setOnClickListener {
-                GpsTrackingService.paused = false
+                GpsTrackingService.instance?.resumeTrackingGps()
                 Toast.makeText(requireContext(), "Reprise du trajet", Toast.LENGTH_SHORT).show()
                 resumeButton.visibility = View.GONE
                 pauseButton.visibility = View.VISIBLE

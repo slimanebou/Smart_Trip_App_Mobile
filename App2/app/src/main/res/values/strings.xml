@@ -31,6 +31,7 @@
     <string name="view_pois">View POIs</string>
     <string name="add_poi">Add POI</string>
     <string name="no_pois">No points of interest</string>
+    <string name="centrer_ma_position">Centrer ma position</string>
     <!-- TODO: Remove or change this placeholder text -->
 
 </resources>
