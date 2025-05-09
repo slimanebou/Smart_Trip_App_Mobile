@@ -32,6 +32,7 @@
     <string name="add_poi">Add POI</string>
     <string name="no_pois">No points of interest</string>
     <string name="centrer_ma_position">Centrer ma position</string>
+    <string name="ajouter_un_point_d_int_r_t">Ajouter un point d’intérêt</string>
     <!-- TODO: Remove or change this placeholder text -->
 
 </resources>

@@ -17,8 +17,4 @@ data class Itinerary(
     fun ajouterPointInteret(poi: PointOfInterest) {
         interst_points.add(poi)
     }
-
-    fun ajouterPointItineraire(point: GeoPoint) {
-        it_points.add(point)
-    }
 }

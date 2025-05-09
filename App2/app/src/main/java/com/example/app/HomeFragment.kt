@@ -9,6 +9,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import android.widget.ImageView
@@ -40,13 +41,21 @@ import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 import java.io.File
 import com.bumptech.glide.Glide
+import com.example.app.helpers.GeoHelper
 import com.example.app.helpers.MapHelper
 import com.example.app.helpers.MapSearchHelper
+import com.example.app.models.PointOfInterest
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 
 
 class HomeFragment : Fragment() {
 
     private lateinit var imageViewProfileHome: ImageView
+    private var markerUpdateJob: Job? = null
+
 
     // Déclaration un variable mutable binding pour FragmentProfileBinding pour gerer les cycles de vie
     // _ c'est une convention Kotlin pour indique la version brute (comme * en rust)
@@ -152,8 +161,9 @@ class HomeFragment : Fragment() {
         recording.observe(viewLifecycleOwner) { isRecording ->
             setupButtons(isRecording)
             addPhotoButton.visibility = if (isRecording) View.VISIBLE else View.GONE
-
+            binding.btnAddPoi.visibility = if (isRecording) View.VISIBLE else View.GONE
         }
+
 
         binding.btnCenterMap.setOnClickListener {
             MapHelper.centerOnUserPosition(requireContext(), binding.mapView)
@@ -176,7 +186,7 @@ class HomeFragment : Fragment() {
 
         if (PermissionHelper.hasLocationPermission(requireContext())) {
             showMap()
-            loadCurrentPosition()
+            loadCurrentPosition(true)
             if (shouldStartJourney) {
                 startJourney(ville, nom, isPublic, countryCode)
             }
@@ -217,10 +227,12 @@ class HomeFragment : Fragment() {
             // recuperer et afficher les données d'utilisateur spécifique
             usersRef.child(uid).addValueEventListener(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
-                    // Récupération directe du champ
+                    if (!isAdded || _binding == null) return
+
                     val firstName = snapshot.child("firstName").value?.toString()
-                        binding.textView2.text = "Hi, $firstName"
+                    binding.textView2.text = "Hi, $firstName"
                 }
+
 
                 override fun onCancelled(error: DatabaseError) {
                     // Gestion des erreurs
@@ -229,6 +241,14 @@ class HomeFragment : Fragment() {
             })
         }
 
+        markerUpdateJob = lifecycleScope.launch {
+            while (isActive) {
+                delay(3000)
+                loadCurrentPosition(false)
+            }
+        }
+
+
         addPhotoButton.setOnClickListener {
             if (recording.value == true || JourneyManager.currentItinerary != null) {
                 showPhotoChoiceDialog()
@@ -236,6 +256,31 @@ class HomeFragment : Fragment() {
                 Toast.makeText(requireContext(), "Veuillez démarrer un trajet avant d'ajouter des photos.", Toast.LENGTH_SHORT).show()
             }
         }
+
+        binding.btnAddPoi.setOnClickListener {
+            if (JourneyManager.currentItinerary == null) {
+                Toast.makeText(requireContext(), "Aucun voyage en cours", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            if (!PermissionHelper.hasLocationPermission(requireContext())) {
+                Toast.makeText(requireContext(), "Permission de localisation requise", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            fusedLocationClient.lastLocation.addOnSuccessListener { location ->
+                if (location != null) {
+                    lifecycleScope.launch {
+                        val address = GeoHelper.getPlaceName(location.latitude, location.longitude)
+                        showAddPoiDialog(location.latitude, location.longitude, address ?: "Adresse inconnue")
+                    }
+                } else {
+                    Toast.makeText(requireContext(), "Position actuelle non disponible", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+
+
 
     }
 
@@ -268,6 +313,28 @@ class HomeFragment : Fragment() {
         }
     }
 
+    private fun showAddPoiDialog(lat: Double, lon: Double, address: String) {
+        val dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_add_poi, null)
+        val descInput = dialogView.findViewById<EditText>(R.id.poiDescriptionInput)
+
+        AlertDialog.Builder(requireContext())
+            .setTitle("Ajouter un point d'intérêt")
+            .setView(dialogView)
+            .setPositiveButton("Ajouter") { _, _ ->
+                val poi = PointOfInterest(
+                    name = address,
+                    description = descInput.text.toString(),
+                    location = GeoPoint(lat, lon),
+                )
+
+                JourneyManager.currentItinerary?.ajouterPointInteret(poi)
+                Toast.makeText(requireContext(), "Point ajouté !", Toast.LENGTH_SHORT).show()
+            }
+            .setNegativeButton("Annuler", null)
+            .show()
+    }
+
+
 
     private fun showPhotoChoiceDialog() {
         AlertDialog.Builder(requireContext())
@@ -286,13 +353,13 @@ class HomeFragment : Fragment() {
 
 
     @SuppressLint("MissingPermission")
-    private fun loadCurrentPosition() {
+    private fun loadCurrentPosition(center : Boolean) {
         if (PermissionHelper.hasLocationPermission(requireContext())) {
             fusedLocationClient.lastLocation.addOnSuccessListener { location ->
                 location?.let {
                     val point = GeoPoint(it.latitude, it.longitude)
                     mapView.post {
-                        MapManager.markPosition(mapView, point)
+                        MapManager.markPosition(mapView, point, center=center)
                     }
                 }
             }
@@ -311,6 +378,19 @@ class HomeFragment : Fragment() {
             MapManager.drawItinerary(it, mapView)
         }
     }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+
+        //  Stop la mise à jour automatique du marqueur GPS
+        markerUpdateJob?.cancel()
+        markerUpdateJob = null
+
+        _binding = null
+        MapManager.setToNull()
+    }
+
+
 
     private fun showMap() {
         blurOverlay.visibility = View.GONE
@@ -344,6 +424,43 @@ class HomeFragment : Fragment() {
             takePhotoLauncher.launch(safeUri)
         }
     }
+
+    override fun onResume() {
+        super.onResume()
+
+        //  Redémarre la coroutine si elle a été annulée
+        if (markerUpdateJob == null || markerUpdateJob?.isActive == false) {
+            markerUpdateJob = lifecycleScope.launch {
+                while (isActive) {
+                    delay(3000)
+                    loadCurrentPosition(false)
+                }
+            }
+        }
+
+        if (!this::mapView.isInitialized || _binding == null) return
+
+        binding.root.post {
+            //  On vérifie que le fragment est encore actif
+            if (!isAdded || context == null) return@post
+
+            if (binding.editTextText2.text.isNullOrEmpty()) {
+                MapHelper.centerOnUserPosition(requireContext(), binding.mapView)
+            }
+
+            val isRecording = recording.value == true
+            val isPaused = GpsTrackingService.paused
+
+            if (isRecording) {
+                binding.pauseButton.visibility = if (isPaused) View.GONE else View.VISIBLE
+                binding.resumeButton.visibility = if (isPaused) View.VISIBLE else View.GONE
+            } else {
+                binding.pauseButton.visibility = View.GONE
+                binding.resumeButton.visibility = View.GONE
+            }
+        }
+    }
+
 
 
 

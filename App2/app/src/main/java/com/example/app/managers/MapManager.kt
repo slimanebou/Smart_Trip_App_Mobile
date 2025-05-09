@@ -7,6 +7,7 @@ import android.graphics.Canvas
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.net.Uri
+import android.util.Log
 import android.widget.ImageView
 import androidx.annotation.DrawableRes
 import androidx.appcompat.app.AlertDialog
@@ -21,7 +22,10 @@ import com.example.app.models.Itinerary
 
 object MapManager {
 
-    fun markPosition(mapView: MapView, position: GeoPoint, message: String = "Vous êtes ici") {
+    private var currentPositionMarker: Marker? = null
+
+
+    /*fun markPosition(mapView: MapView, position: GeoPoint, message: String = "Vous êtes ici") {
         val marker = Marker(mapView)
         marker.position = position
         marker.title = message
@@ -29,7 +33,26 @@ object MapManager {
         mapView.overlays.add(marker)
         mapView.controller.setCenter(position)
         mapView.invalidate()
+    }*/
+
+    fun setToNull() {
+        currentPositionMarker = null
     }
+
+
+    fun markPosition(mapView: MapView, position: GeoPoint, message: String = "Vous êtes ici", center : Boolean) {
+        if (currentPositionMarker == null) {
+            currentPositionMarker = Marker(mapView).apply {
+                title = message
+                setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+                mapView.overlays.add(this)
+            }
+        }
+        if (center) {mapView.controller.setCenter(position)}
+        currentPositionMarker?.position = position
+        mapView.invalidate()
+    }
+
 
     fun drawItinerary(itinerary: Itinerary, mapView: MapView) {
         if (itinerary.it_points.size < 2) return // pas assez de points pour dessiner

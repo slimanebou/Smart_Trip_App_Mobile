@@ -129,6 +129,17 @@
                     android:layout_gravity="bottom|end"
                     android:layout_margin="16dp"/>
 
+                <com.google.android.material.floatingactionbutton.FloatingActionButton
+                    android:id="@+id/btnAddPoi"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom|start"
+                    android:layout_margin="16dp"
+                    app:backgroundTint="@color/bleu"
+                    app:tint="@null"
+                    android:src="@drawable/ic_add_location"
+                    android:contentDescription="@string/ajouter_un_point_d_int_r_t" />
+
 
 
             </FrameLayout>

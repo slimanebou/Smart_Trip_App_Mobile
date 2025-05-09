@@ -121,7 +121,7 @@ object JourneyManager {
             }
             .addOnFailureListener { e ->
                 Toast.makeText(context, "Erreur: ${e.message}", Toast.LENGTH_SHORT).show()
-                Log.e("Firebase", "❌ Erreur Firestore : ${e.message}")
+                Log.e("Firebase", " Erreur Firestore : ${e.message}")
             }
     }
 
