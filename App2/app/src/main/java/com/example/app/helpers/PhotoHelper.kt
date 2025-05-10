@@ -68,6 +68,7 @@ class PhotoHelper(private val context: Context) {
 
 
     fun getLocationFromImage(context: Context, uri: Uri): Location? {
+        // Fonction qui récupère la localisation d'une photo
         return try {
             val inputStream: InputStream? = context.contentResolver.openInputStream(uri)
             inputStream?.use { stream ->
@@ -92,10 +93,12 @@ class PhotoHelper(private val context: Context) {
 
 
     private fun attachPhotoToPoiIfPossible(photo: PhotoModel) {
+        // Fonction qui essaye d'attacher une photo à un point d'intérêt
         val itinerary = JourneyManager.currentItinerary ?: return
         val pois = itinerary.interst_points
 
         photo.position?.let { photoPosition ->
+            // On récupère le POI le plus proche ou bien null si la liste est vide
             val nearestPoi = pois.minByOrNull { poi ->
                 photoPosition.distanceToAsDouble(poi.location)
             }

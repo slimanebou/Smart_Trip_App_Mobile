@@ -16,29 +16,34 @@ import okhttp3.Request
 object GeoHelper {
 
     suspend fun getPlaceName(lat: Double, lon: Double): String? {
-        return withContext(Dispatchers.IO) {
+        return withContext(Dispatchers.IO) { // Exécuter sur le thread d’entrée/sortie (I/O)
             try {
+                // Prépare l'URL de requête vers Nominatim (OpenStreetMap)
                 val url = URL("https://nominatim.openstreetmap.org/reverse?format=json&lat=$lat&lon=$lon")
 
+                // Ouvre une connexion HTTP
                 val connection = url.openConnection() as HttpURLConnection
                 connection.requestMethod = "GET"
-                connection.setRequestProperty("User-Agent", "com.example.app/1.0") // obligatoire pour OSM
+                connection.setRequestProperty("User-Agent", "com.example.app/1.0")
                 connection.connectTimeout = 5000
                 connection.readTimeout = 5000
 
+                // Si la réponse est correcte (200 OK)
                 if (connection.responseCode == HttpURLConnection.HTTP_OK) {
+                    // Lire la réponse JSON
                     val response = connection.inputStream.bufferedReader().use { it.readText() }
                     val jsonObject = JSONObject(response)
-                    return@withContext jsonObject.optString("display_name", null)
+                    return@withContext jsonObject.optString("display_name", null) // Renvoie le nom du lieu
                 } else {
                     Log.e("GeoHelper", "Erreur HTTP ${connection.responseCode}")
                 }
             } catch (e: Exception) {
                 Log.e("GeoHelper", "Erreur de récupération du lieu", e)
             }
-            null
+            null // En cas d’erreur on  retourne null
         }
     }
+
 
     suspend fun getCityAndCountryCode(lat: Double, lon: Double): Pair<String?, String?>? {
         return withContext(Dispatchers.IO) {
@@ -54,8 +59,10 @@ object GeoHelper {
                     val response = connection.inputStream.bufferedReader().use { it.readText() }
                     val jsonObject = JSONObject(response)
                     val address = jsonObject.optJSONObject("address")
+
+                    // Essayons de récupérer le nom de la ville depuis différents champs (city/town/village)
                     val city = address?.optString("city") ?: address?.optString("town") ?: address?.optString("village")
-                    val countryCode = address?.optString("country_code")?.uppercase()
+                    val countryCode = address?.optString("country_code")?.uppercase() // FR, US, etc.
                     return@withContext city to countryCode
                 }
             } catch (e: Exception) {
@@ -65,8 +72,10 @@ object GeoHelper {
         }
     }
 
+
     suspend fun searchCityCoordinates(context: Context, cityName: String): Pair<Double, Double>? {
         return withContext(Dispatchers.IO) {
+            // Encode le nom de la ville dans l’URL
             val url = "https://nominatim.openstreetmap.org/search?q=${URLEncoder.encode(cityName, "UTF-8")}&format=json&limit=1"
             val request = Request.Builder().url(url).header("User-Agent", "SmartTripApp").build()
             val client = OkHttpClient()
@@ -78,7 +87,7 @@ object GeoHelper {
                     val obj = json.getJSONObject(0)
                     val lat = obj.getDouble("lat")
                     val lon = obj.getDouble("lon")
-                    return@withContext lat to lon
+                    return@withContext lat to lon // Renvoie les coordonnées
                 }
             } catch (e: Exception) {
                 Log.e("GeoHelper", "Erreur de géocodage", e)
@@ -87,6 +96,7 @@ object GeoHelper {
             return@withContext null
         }
     }
+
 
 
 }

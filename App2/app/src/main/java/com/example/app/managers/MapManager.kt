@@ -36,11 +36,13 @@ object MapManager {
     }*/
 
     fun setToNull() {
+        // Mettre le marqueur de la position actuelle à null
         currentPositionMarker = null
     }
 
 
     fun markPosition(mapView: MapView, position: GeoPoint, message: String = "Vous êtes ici", center : Boolean) {
+        // Fonction pour rajouter un marqueur à la position fournie en argument
         if (currentPositionMarker == null) {
             currentPositionMarker = Marker(mapView).apply {
                 title = message
@@ -158,6 +160,7 @@ object MapManager {
 
 
     private fun resizeIcon(context: Context, @DrawableRes resId: Int, widthDp: Int, heightDp: Int): BitmapDrawable? {
+        // Méthode pour redimensionner une icone afin de pouvoir l'utiliser comme marqueur
         val drawable = ContextCompat.getDrawable(context, resId) ?: return null
         val metrics = context.resources.displayMetrics
         val widthPx = (widthDp * metrics.density).toInt()

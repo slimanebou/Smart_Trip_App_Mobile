@@ -8,6 +8,7 @@ import org.osmdroid.views.MapView
 object MapConfigurator {
 
     fun initializeOSMDroid(context: Context) {
+        // Configuration de la bibliothèque OSM
         Configuration.getInstance().load(
             context,
             androidx.preference.PreferenceManager.getDefaultSharedPreferences(context)
@@ -16,8 +17,11 @@ object MapConfigurator {
     }
 
     fun configureMap(mapView: MapView) {
+        // Les tuiles
         mapView.setTileSource(TileSourceFactory.MAPNIK)
+        // Activation du Zoom
         mapView.setMultiTouchControls(true)
+        // Zoom par défaut
         mapView.controller.setZoom(15.0)
     }
 }

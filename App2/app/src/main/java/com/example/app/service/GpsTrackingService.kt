@@ -42,16 +42,19 @@ class GpsTrackingService : Service() {
         registerReceiver(batteryReceiver, intentFilter)
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
-        locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 5000L)
-            .setMinUpdateIntervalMillis(5000L)
+        // L'interval de récupération de coordonnées GPS est de 5 minutes
+        locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 300000L)
+            .setMinUpdateIntervalMillis(300000L)
             .build()
 
+        // Initialisation du détécteur de POIs
         JourneyManager.currentItinerary?.let {
             poiDetector = PointOfInterestDetector(it)
         }
 
         locationCallback = object : LocationCallback() {
             override fun onLocationResult(locationResult: LocationResult) {
+                // à chaque capture
                 super.onLocationResult(locationResult)
                 if (paused) return
 
@@ -111,6 +114,7 @@ class GpsTrackingService : Service() {
     }
 
     fun stopTracking() {
+        // Méthode pour arrêter le service complètement
         if (::fusedLocationClient.isInitialized) {
             fusedLocationClient.removeLocationUpdates(locationCallback)
         }
@@ -119,6 +123,7 @@ class GpsTrackingService : Service() {
     }
 
     fun pauseTrackingGps() {
+        // Méthode pour mettre le service en pause
         if (!paused) {
             fusedLocationClient.removeLocationUpdates(locationCallback)
             paused = true
@@ -128,6 +133,7 @@ class GpsTrackingService : Service() {
 
     @SuppressLint("MissingPermission")
     fun resumeTrackingGps() {
+        // Méthode pour reprende le service
         if (paused && PermissionHelper.hasLocationPermission(this)) {
             fusedLocationClient.requestLocationUpdates(
                 locationRequest,

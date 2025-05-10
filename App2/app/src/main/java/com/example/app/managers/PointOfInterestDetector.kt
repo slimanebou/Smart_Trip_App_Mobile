@@ -10,8 +10,8 @@ import org.osmdroid.util.GeoPoint
 
 class PointOfInterestDetector(
     private val itinerary: Itinerary,
-    private val detectionRadiusMeters: Double = 100.0,  // Rayon de détection
-    private val stayDurationMillis: Long = 2 * 60 * 1000  // Temps d'arrêt minimum (30 minutes par défaut)
+    private val detectionRadiusMeters: Double = 500.0,  // Rayon de détection
+    private val stayDurationMillis: Long = 10 * 60 * 1000  // Temps d'arrêt minimum
 ) {
     private var lastLocation: GeoPoint? = null
     private var stationaryStartTime: Long = 0L
@@ -46,7 +46,7 @@ class PointOfInterestDetector(
         CoroutineScope(Dispatchers.IO).launch {
             val placeName = GeoHelper.getPlaceName(location.latitude, location.longitude)
 
-            // 🔥 Ici, remplace ton User-Agent manuellement :
+            //  Ici, remplace ton User-Agent manuellement :
             val name = placeName ?: "Point d'intérêt inconnu"
 
             itinerary.ajouterPointInteret(PointOfInterest(name, location = location))

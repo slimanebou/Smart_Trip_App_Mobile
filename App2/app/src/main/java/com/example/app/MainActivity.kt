@@ -23,8 +23,11 @@ import kotlinx.coroutines.launch
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
+    // LiveData pour observer si le voyage est en cours ou pas
     companion object{ var recording = MutableLiveData(false) }
+    // Bouton du lancement de voyage
     private lateinit var fab : FloatingActionButton
+    // Par défaut : un voyage n'est pas public
     private var isPublicTrip = false
 
 
@@ -52,6 +55,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         fab = findViewById<FloatingActionButton>(R.id.floatingActionButton)
+        // Lorsqu'on appuie sur le bouton +
         fab.setOnClickListener {
             if (PermissionHelper.hasLocationPermission(this)) {
                 if (!recording.value!!) {
@@ -83,6 +87,7 @@ class MainActivity : AppCompatActivity() {
 
 
     private fun replaceFragment(fragment: Fragment, selectNavItemId: Int? = null) {
+        // Méthode qui simplifie le remplacement de fragment
         val fragmentManager = supportFragmentManager
         val fragmentTransaction = fragmentManager.beginTransaction()
         fragmentTransaction.replace(R.id.frame_layout, fragment)
@@ -98,13 +103,19 @@ class MainActivity : AppCompatActivity() {
     @SuppressLint("CutPasteId", "MissingPermission")
     @RequiresApi(Build.VERSION_CODES.O)
     fun showStartJourneyDialog() {
+        // La fonction qui affiche le dialogue du lancement de trajet
+
+        // On récupère le layout
         val dialogView = layoutInflater.inflate(R.layout.dialog_start_journey, null)
 
+        // Le champ de la ville de départ
         val villeDepartInput = dialogView.findViewById<EditText>(R.id.villeDepartInput)
+        // Le nom du trajet
         val nomTrajetInput = dialogView.findViewById<EditText>(R.id.nomTrajetInput)
+        // Le check Box du public
         val trajetPublicCheckBox = dialogView.findViewById<CheckBox>(R.id.trajetPublicCheckBox)
 
-        // 🔁 Détection automatique de la ville + pays
+        //  Détection automatique de la ville + pays
         val fusedClient = LocationServices.getFusedLocationProviderClient(this)
         if (PermissionHelper.hasLocationPermission(this)) {
             fusedClient.lastLocation.addOnSuccessListener { location ->
@@ -130,7 +141,7 @@ class MainActivity : AppCompatActivity() {
             .setPositiveButton("Démarrer") { dialog, id ->
                 val nomTrajet = nomTrajetInput.text.toString()
                 val villeDepart = villeDepartInput.text.toString()
-                val countryCode = villeDepartInput.tag as String // Récupère ce qu'on a mis plus haut
+                val countryCode = villeDepartInput.tag as String
                 isPublicTrip = trajetPublicCheckBox.isChecked
 
                 fab.setImageResource(R.drawable.close)
@@ -167,6 +178,7 @@ class MainActivity : AppCompatActivity() {
 
 
     private fun showStopJourneyConfirmation() {
+        // Affichage du dialogue pour la confirmation du fin de trajet
         AlertDialog.Builder(this)
             .setTitle("Terminer le trajet ?")
             .setMessage("Voulez-vous vraiment terminer votre trajet ?")

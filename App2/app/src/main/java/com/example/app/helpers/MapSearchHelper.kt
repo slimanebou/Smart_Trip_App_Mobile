@@ -18,17 +18,17 @@ object MapSearchHelper {
         lifecycleScope: CoroutineScope,
         context: Context
     ) {
+        // Dés que y a un changement de texte
         searchEditText.doOnTextChanged { text, _, _, _ ->
+            // On récupère le texte
             val query = text.toString().trim()
-
+            // S'il est vide on ce recentre sur la position actuelle
             if (query.isEmpty()) {
-                // Recentrer sur la position actuelle
-                if (query.isEmpty()) {
-                    MapHelper.centerOnUserPosition(context, mapView)
-                    return@doOnTextChanged
-                }
+                MapHelper.centerOnUserPosition(context, mapView)
+                return@doOnTextChanged
             }
 
+            // Si le texte est de longueur sup à 3
             if (query.length >= 3) {
                 lifecycleScope.launch {
                     val result = GeoHelper.searchCityCoordinates(context, query)

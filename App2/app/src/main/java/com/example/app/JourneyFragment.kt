@@ -29,6 +29,7 @@ class JourneyFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        // Récupération du binding à partir du layout
         _binding = FragmentJourneyBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -60,8 +61,12 @@ class JourneyFragment : Fragment() {
 
         loadPublicTrips()
 
+        // Lorsque l'utilisateur tape quelque chose dans la barre de recherche
         binding.editTextJourney.doOnTextChanged { text, _, _, _ ->
+            // On récupère ce qu'il a entré
             val query = text?.toString()?.trim()?.lowercase() ?: ""
+            // On crée une nouvelle liste filtré à partir de la première avec les ville qui contiennent
+            // La chaine de caractères que l'utilisateur a entré
             val filteredList = publicVoyagesList.filter {
                 it.villeDepart?.lowercase()?.contains(query) == true
             }
@@ -109,7 +114,9 @@ class JourneyFragment : Fragment() {
         displayedVoyages.addAll(list)
         voyageAdapter.updateList(displayedVoyages)
 
+        // Si la liste est vide : on affiche le emptyText
         binding.emptyText.visibility = if (list.isEmpty()) View.VISIBLE else View.GONE
+        // Sinon on affiche les voyages concernés
         binding.recyclerViewJourney.visibility = if (list.isEmpty()) View.GONE else View.VISIBLE
     }
 
