@@ -7,7 +7,6 @@ import android.util.Log
 import android.widget.Toast
 import com.example.app.models.*
 import com.example.app.service.GpsTrackingService
-import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
@@ -99,6 +98,12 @@ object JourneyManager {
         photos: List<PhotoMeta>,
         context: Context
     ) {
+
+        val db = FirebaseFirestore.getInstance()
+        val userRef = db.collection("Utilisateurs").document(userId)
+        val voyageRef = userRef.collection("voyages").document(voyageId)
+        val poisCol = voyageRef.collection("poi")
+
         val voyage = Voyage(
             id = voyageId,
             nom = itinerary.name ?: "Voyage sans nom",
@@ -113,38 +118,43 @@ object JourneyManager {
             countryCode = itinerary.countryCode
         )
 
-        saveVoyageToFirestore(userId, voyage)
+// 2) Récupérer les infos user, puis lancer le batch
+        userRef.get().continueWithTask { task ->
+            if (!task.isSuccessful) throw task.exception!!
+            val snap = task.result!!
+            voyage.ownerFirstName = snap.getString("firstName").orEmpty()
+            voyage.ownerLastName = snap.getString("lastName").orEmpty()
+            voyage.ownerPhotoUrl = snap.getString("profilePhotoUrl").orEmpty()
+
+            // 3) Préparer un batch
+            val batch = db.batch()
+            // 3.a) Écrire le document Voyage
+            batch.set(voyageRef, voyage)
+            // 3.b) Pour chacun des POI, ajouter un set() dans la sous-collection "poi"
+            itinerary.interst_points.forEach { poi ->
+                val poiDoc = poisCol.document()
+                batch.set(
+                    poiDoc, mapOf(
+                        "name" to poi.name,
+                        "description" to poi.description,
+                        "latitude" to poi.location.latitude,
+                        "longitude" to poi.location.longitude,
+                    )
+                )
+            }
+            // 4) Commit unique
+            batch.commit()
+        }
             .addOnSuccessListener {
-                Toast.makeText(context, "Voyage enregistré avec succès", Toast.LENGTH_SHORT).show()
-                Log.d("Firebase", "✅ Voyage sauvegardé avec infos utilisateur")
+                Toast.makeText(context, "Voyage + POI sauvegardés avec succès", Toast.LENGTH_SHORT)
+                    .show()
                 currentItinerary = null
             }
             .addOnFailureListener { e ->
-                Toast.makeText(context, "Erreur: ${e.message}", Toast.LENGTH_SHORT).show()
-                Log.e("Firebase", " Erreur Firestore : ${e.message}")
+                Toast.makeText(context, "Erreur sauvegarde : ${e.message}", Toast.LENGTH_SHORT)
+                    .show()
+                Log.e("Firebase", "Erreur batch save: ${e.message}")
             }
-    }
-
-    fun saveVoyageToFirestore(userId: String, voyage: Voyage): Task<Void> {
-        val db = FirebaseFirestore.getInstance()
-        val userDocRef = db.collection("Utilisateurs").document(userId)
-
-        return userDocRef.get().continueWithTask { task ->
-            if (!task.isSuccessful) {
-                throw task.exception ?: Exception("Échec de la récupération de l'utilisateur")
-            }
-
-            val userSnap = task.result
-            val firstName = userSnap?.getString("firstName") ?: ""
-            val lastName = userSnap?.getString("lastName") ?: ""
-            val profileUrl = userSnap?.getString("profilePhotoUrl") ?: ""
-
-            voyage.ownerFirstName = firstName
-            voyage.ownerLastName = lastName
-            voyage.ownerPhotoUrl = profileUrl
-
-            userDocRef.collection("voyages").document(voyage.id).set(voyage)
-        }
     }
 
     private fun getPhotoDateFromExif(context: Context, uri: Uri): String {
