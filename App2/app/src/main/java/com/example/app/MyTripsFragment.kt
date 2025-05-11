@@ -147,8 +147,29 @@ class MyTripsFragment : Fragment() {
                     )
             }
             .setNegativeButton("Annuler", null)
-            .show()
-    }
+
+
+            .setNeutralButton("Supprimer") { _, _ ->
+                FirebaseFirestore.getInstance()
+                    .collection("Utilisateurs")
+                    .document(voyage.utilisateur)
+                    .collection("voyages")
+                    .document(voyage.id)
+                    .delete()
+                    .addOnSuccessListener {
+                        Toast.makeText(requireContext(),
+                            "Voyage supprimé", Toast.LENGTH_SHORT).show()
+                        // Mise à jour locale de la liste
+                        val index = voyages.indexOf(voyage)
+                        if (index != -1) {
+                            voyages.removeAt(index)
+                            adapter.notifyItemRemoved(index)
+                        }
+                    }
+                    .addOnFailureListener { e ->
+                        Toast.makeText(requireContext(),
+                            "Erreur suppression : ${e.message}", Toast.LENGTH_SHORT).show()
+    }}.show()}
 
 
     override fun onDestroyView() {

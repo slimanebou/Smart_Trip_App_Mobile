@@ -52,35 +52,48 @@ class FavoriteFragment : Fragment() {
             .collection("favoris")
             .get()
             .addOnSuccessListener { favSnap ->
-                // On récupère tripId + ownerId depuis chaque doc "favoris"
-                val pairs = favSnap.documents.mapNotNull { doc ->
-                    val tripId  = doc.getString("tripId")
-                    val ownerId = doc.getString("ownerId")
-                    if (tripId != null && ownerId != null) tripId to ownerId else null
-                }
-
+                // On vide d’abord la liste locale pour éviter doublons ou éléments obsolètes
                 favorisList.clear()
-                // Pour chaque (tripId, ownerId), on va chercher le document précis
-                pairs.forEach { (tripId, ownerId) ->
+
+                // Pour chaque doc "favoris"
+                favSnap.documents.forEach { favDoc ->
+                    val tripId = favDoc.getString("tripId")
+                    val ownerId = favDoc.getString("ownerId")
+                    val favRef = favDoc.reference
+
+                    if (tripId == null || ownerId == null) {
+                        // Données malformées : on supprime l’entry orpheline
+                        favRef.delete()
+                        return@forEach
+                    }
+
+                    // Vérification de l’existence du voyage
                     db.collection("Utilisateurs")
                         .document(ownerId)
                         .collection("voyages")
                         .document(tripId)
                         .get()
                         .addOnSuccessListener { tripDoc ->
-                            tripDoc.toObject(Voyage::class.java)?.let { voyage ->
-                                voyage.id = tripDoc.id
-                                favorisList.add(voyage)
-                                adapter.updateList(favorisList)
+                            if (tripDoc.exists()) {
+                                // Voyage valide → on l’ajoute à l’affichage
+                                tripDoc.toObject(Voyage::class.java)?.let { voyage ->
+                                    voyage.id = tripDoc.id
+                                    voyage.utilisateur = ownerId
+                                    favorisList.add(voyage)
+                                    adapter.updateList(favorisList)
+                                }
+                            } else {
+                                // Voyage supprimé → on nettoie le favori orphelin
+                                favRef.delete()
                             }
                         }
                         .addOnFailureListener {
-                            // Gérer l'erreur si besoin (log / Toast)
+                            // Optionnel : log ou Toast
                         }
                 }
             }
             .addOnFailureListener {
-                // Gérer l'erreur de lecture de la sous-collection "favoris"
+                // Gérer l’erreur de lecture de la sous-collection “favoris”
             }
     }
 }
