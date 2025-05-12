@@ -11,6 +11,7 @@ import android.widget.*
 import androidx.fragment.app.Fragment
 import com.bumptech.glide.Glide
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.firestore.FirebaseFirestore
 
 class EditProfileFragment : Fragment() {
@@ -58,44 +59,68 @@ class EditProfileFragment : Fragment() {
 
         saveButton.setOnClickListener {
             val firstName = firstNameInput.text.toString().trim()
-            val lastName = lastNameInput.text.toString().trim()
+            val lastName  = lastNameInput.text.toString().trim()
 
             if (firstName.isEmpty() || lastName.isEmpty()) {
-                Toast.makeText(requireContext(), "Tous les champs sont obligatoires", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(),
+                    "Tous les champs sont obligatoires",
+                    Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
             val uid    = auth.currentUser!!.uid
-            val userRef = firestore.collection("Utilisateurs").document(uid)
+            val fsRef  = firestore.collection("Utilisateurs").document(uid)
+            val rtRef  = FirebaseDatabase.getInstance()
+                .getReference("users")
+                .child(uid)
 
-            userRef.update(
-                mapOf(
-                    "firstName"      to firstName,
-                    "lastName"       to lastName
-                )
-            ).addOnSuccessListener {
-                // 2) S’il n’y a pas de nouvelle photo, on peut directement propager le nom/prénom
-                propagateNameToTrips(uid, firstName, lastName, null)
-            }
+            // 1) Prépare les mêmes données pour Firestore et Realtime DB
+            val updates = mapOf(
+                "firstName" to firstName,
+                "lastName"  to lastName
+            )
 
-            // 3) Si une nouvelle photo a été sélectionnée, on l’upload puis on propage aussi l’URL
+            // 2) Mets à jour Firestore
+            fsRef.update(updates)
+                .addOnCompleteListener {
+                    // (optionnel) log ou Toast
+                }
+
+            // 3) Mets à jour Realtime DB
+            rtRef.updateChildren(updates)
+                .addOnCompleteListener {
+                    // (optionnel) log ou Toast
+                }
+
+            // 4) Si une nouvelle photo est sélectionnée, on l’upload puis on propage l’URL
             selectedImageUri?.let { uri ->
                 FirebaseStorageHelper.uploadProfilePhoto(uri,
                     onSuccess = { downloadUrl ->
-                        userRef.update("profilePhotoUrl", downloadUrl)
-                            .addOnSuccessListener {
-                                propagateNameToTrips(uid, firstName, lastName, downloadUrl)
-                            }
+                        // a) Firestore
+                        fsRef.update("profilePhotoUrl", downloadUrl)
+                        // b) Realtime DB
+                        rtRef.child("profilePhotoUrl").setValue(downloadUrl)
+
+                        // puis on propage aux voyages
+                        propagateNameToTrips(uid, firstName, lastName, downloadUrl)
                     },
                     onFailure = {
                         Toast.makeText(requireContext(),
-                            "Photo upload error: ${it.message}", Toast.LENGTH_SHORT).show()
-                        // on propage quand même le nom/prénom
+                            "Erreur upload photo: ${it.message}",
+                            Toast.LENGTH_SHORT).show()
                         propagateNameToTrips(uid, firstName, lastName, null)
-                    })
+                    }
+                )
             }
 
-            Toast.makeText(requireContext(), "Profile updated", Toast.LENGTH_SHORT).show()
+            // 5) Si pas de nouvelle photo, on propage directement le nom/prénom
+            if (selectedImageUri == null) {
+                propagateNameToTrips(uid, firstName, lastName, null)
+            }
+
+            Toast.makeText(requireContext(),
+                "Profil mis à jour",
+                Toast.LENGTH_SHORT).show()
             parentFragmentManager.popBackStack()
         }
         deleteButton.setOnClickListener {
