@@ -1,6 +1,7 @@
 package com.example.app
 
 import android.app.Activity
+import android.app.AlertDialog
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -18,6 +19,7 @@ class EditProfileFragment : Fragment() {
     private lateinit var firstNameInput: EditText
     private lateinit var lastNameInput: EditText
     private lateinit var saveButton: Button
+    private lateinit var deleteButton: Button
 
     private val PICK_IMAGE_REQUEST = 1
     private var selectedImageUri: Uri? = null
@@ -35,6 +37,7 @@ class EditProfileFragment : Fragment() {
         firstNameInput = view.findViewById(R.id.editFirstName)
         lastNameInput = view.findViewById(R.id.editLastName)
         saveButton = view.findViewById(R.id.buttonSaveProfile)
+        deleteButton = view.findViewById(R.id.buttonDeleteAccount)
 
         val uid = auth.currentUser?.uid ?: return
 
@@ -95,6 +98,16 @@ class EditProfileFragment : Fragment() {
             Toast.makeText(requireContext(), "Profile updated", Toast.LENGTH_SHORT).show()
             parentFragmentManager.popBackStack()
         }
+        deleteButton.setOnClickListener {
+            AlertDialog.Builder(requireContext())
+                .setTitle("Delete Account")
+                .setMessage("Are you sure you want to delete your account? This action cannot be undone.")
+                .setPositiveButton("Delete") { _, _ ->
+                    performAccountDeletion()
+                }
+                .setNegativeButton("Cancel", null)
+                .show()
+        }
     }
 
     /**
@@ -146,5 +159,35 @@ class EditProfileFragment : Fragment() {
             selectedImageUri = data.data
             imageProfile.setImageURI(selectedImageUri)
         }
+    }
+
+    private fun performAccountDeletion() {
+        val user = auth.currentUser ?: return
+        val uid = user.uid
+        // 1) Supprimer le doc Firestore
+        firestore.collection("Utilisateurs")
+            .document(uid)
+            .delete()
+            .addOnSuccessListener {
+                // 2) Supprimer l’utilisateur Firebase Auth
+                user.delete()
+                    .addOnSuccessListener {
+                        Toast.makeText(requireContext(),
+                            "Account deleted", Toast.LENGTH_SHORT).show()
+                        // 3) Rediriger vers l’écran de login (ou splash)
+                        requireActivity().finish()
+                        startActivity(
+                            Intent(requireContext(), LoginActivity::class.java)
+                        )
+                    }
+                    .addOnFailureListener { e ->
+                        Toast.makeText(requireContext(),
+                            "Auth deletion failed: ${e.message}", Toast.LENGTH_LONG).show()
+                    }
+            }
+            .addOnFailureListener { e ->
+                Toast.makeText(requireContext(),
+                    "Firestore deletion failed: ${e.message}", Toast.LENGTH_LONG).show()
+            }
     }
 }

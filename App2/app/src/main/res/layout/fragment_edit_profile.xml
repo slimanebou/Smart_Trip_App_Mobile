@@ -115,6 +115,18 @@
         app:layout_constraintEnd_toEndOf="@+id/editLastName"
         app:layout_constraintStart_toStartOf="@+id/editLastName"
         app:layout_constraintTop_toBottomOf="@+id/editLastName" />
+    
+    <Button
+    android:id="@+id/buttonDeleteAccount"
+    android:layout_width="0dp"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="16dp"
+    android:text="Delete Account"
+    android:textColor="@android:color/white"
+    android:backgroundTint="@color/red"
+    app:layout_constraintTop_toBottomOf="@+id/buttonSaveProfile"
+    app:layout_constraintStart_toStartOf="@+id/buttonSaveProfile"
+    app:layout_constraintEnd_toEndOf="@+id/buttonSaveProfile"/>
 
 
 
